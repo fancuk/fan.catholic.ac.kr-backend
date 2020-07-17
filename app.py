@@ -28,5 +28,20 @@ def login():
     return jsonify(json_request)
 
 
+@app.route('/api/library/add' , methods=['POST'])
+def add_library():
+    title = request.json['title']
+    writer = request.json['writer']
+    count = request.json['count']
+    check = mongo.add_library(title , writer, count)
+
+    if check is not None:
+        json_request = {'add' : 'True'}
+    else:
+        json_request = {'add' : 'False'}
+
+    return jsonify(json_request)
+
+
 if __name__ == '__main__':
     app.run()
