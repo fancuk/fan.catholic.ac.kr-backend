@@ -1,7 +1,7 @@
 from sqlite3.dbapi2 import Date
 
 from pymongo import MongoClient
-db_id = "taewan"
+db_id = "admin"
 db_pwd = "admin"
 mongo = MongoClient('mongodb://%s:%s@localhost:27017' % (db_id, db_pwd))
 

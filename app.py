@@ -1,10 +1,6 @@
-import json
-
 from flask import Flask, jsonify, request
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
 from db_manager import DBMannager
-from bson.json_util import dumps
-from bson import ObjectId, json_util
 
 app = Flask(__name__)
 mongo = DBMannager()
