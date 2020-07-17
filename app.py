@@ -1,6 +1,10 @@
+import json
+
 from flask import Flask, jsonify, request
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
 from db_manager import DBMannager
+from bson.json_util import dumps
+from bson import ObjectId, json_util
 
 app = Flask(__name__)
 mongo = DBMannager()
@@ -41,6 +45,23 @@ def add_library():
         json_request = {'add' : 'False'}
 
     return jsonify(json_request)
+
+
+@app.route('/api/library/list', methods=['GET'])
+def list_library():
+    check = mongo.get_library()
+
+    if check is not None:
+        json_request = check
+    else:
+        json_request = {'list' : 'False'}
+
+
+    docs = []
+    for doc in check:
+        doc.pop('_id') #개소름
+        docs.append(doc)
+    return jsonify(docs)
 
 
 if __name__ == '__main__':
