@@ -18,7 +18,7 @@ class DBMannager:
 
     def add_library(self, title, writer, count):
         db = mongo.library
-        return db.book.insert_one({"title" : title, "writer" : writer, "count" : count, "renter" : "", "date":newDate(Date.now())})
+        return db.book.insert_one({"title" : title, "writer" : writer, "count" : count, "renter" : ""})
 
 
     def get_library(self):
