@@ -51,11 +51,8 @@ def add_library():
 def list_library():
     check = mongo.get_library()
 
-    if check is not None:
-        json_request = check
-    else:
-        json_request = {'list' : 'False'}
-
+    if check is None:
+        return {'list' : 'False'}
 
     docs = []
     for doc in check:
