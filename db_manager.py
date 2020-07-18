@@ -1,9 +1,9 @@
 from sqlite3.dbapi2 import Date
 
 from pymongo import MongoClient
-db_id = "admin"
-db_pwd = "admin"
-mongo = MongoClient('mongodb://%s:%s@localhost:27017' % (db_id, db_pwd))
+#"admin"
+# "admin"
+mongo = MongoClient('mongodb://localhost:27017')
 
 
 class DBMannager:
@@ -24,6 +24,22 @@ class DBMannager:
     def get_library(self):
         db = mongo.library
         return db.book.find()
+
+    def edit_user_profile(self, json_request):
+        db=mongo.Member_List
+        return db.test_collection.update_one({'id':json_request['id']},
+                                            {'$set':
+                                                {'passward': json_request['pwd'],
+                                                'name': json_request['name'],
+                                                'student_id': json_request['student_id'],
+                                                'grade': json_request['grade'],
+                                                'semester': json_request['semester'],
+                                                'phone': json_request['phone'],
+                                                'email': json_request['email'],
+                                                'level': json_request['level']
+                                            }})
+
+
 
 
     def __del__(self):
