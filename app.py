@@ -56,6 +56,7 @@ def list_library():
         docs.append(doc)
     return jsonify(docs)
 
+
 @app.route ('/api/profile/edit', methods=['POST'])
 def edit_profile():
     check = mongo.edit_user_profile(request.json)
@@ -63,5 +64,7 @@ def edit_profile():
         return {'edit': 'True'}
     else:
         return {'edit': 'False'}
+
+
 if __name__ == '__main__':
     app.run()
