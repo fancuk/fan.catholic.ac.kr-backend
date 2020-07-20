@@ -29,27 +29,26 @@ class DBManager(object):
         return self.collection.library.find()
 
     def rent_library(self, title, renter, date, count):
-        return self.collection.library.update_one({"title": title},
-                                                  {'$push': {'renter': {"user_id": renter, "date": date}},
+        return self.collection.library.update_one({'title': title},
+                                                  {'$push': {'renter': {'user_id': renter, 'date': date}},
                                                    '$set': {'count': count-1}})
 
     def delete_library(self, title):
-        return self.collection.library.delete_one({"title": title})
+        return self.collection.library.delete_one({'title': title})
 
     def find_library(self, title):
-        return self.collection.library.find_one({"title": title})
+        return self.collection.library.find_one({'title': title})
 
     def edit_user_profile(self, json_request):
-        return self.collection.member.update_one({'id': json_request['id']},
+        return self.collection.member.update_one({'id': json_request[0]},
                                             {'$set':
-                                                 {'pwd': json_request['pwd'],
-                                                  'name': json_request['name'],
-                                                  'student_id': json_request['student_id'],
-                                                  'grade': json_request['grade'],
-                                                  'semester': json_request['semester'],
-                                                  'phone': json_request['phone'],
-                                                  'email': json_request['email'],
-                                                  'level': json_request['level']
+                                                 {'pwd': json_request[1],
+                                                  'name': json_request[2],
+                                                  'student_id': json_request[3],
+                                                  'grade': json_request[4],
+                                                  'semester': json_request[5],
+                                                  'phone': json_request[6],
+                                                  'email': json_request[7]
                                                   }})
 
     def __del__(self):
