@@ -114,11 +114,10 @@ def delete_library():
     Param('grade', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('semester', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('phone', JSON, str, rules=[Pattern(r'\d{2,3}-\d{3,4}-\d{4}')], required=True),
-    Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True),
-    Param('level', JSON, str, rules=[Pattern(r'\d')], required=True)
+    Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True)
 )
-def edit_profile():
-    check = mongo.edit_user_profile(request.json)
+def edit_profile(*args):
+    check = mongo.edit_user_profile(args)
     if check is not None:
         return {'edit': 'True'}
     else:
