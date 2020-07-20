@@ -10,11 +10,23 @@ class DBManager(object):
     def get_user_info(self, id):
         return self.collection.member.find_one({"id": id})
 
-    def add_library(self, title, writer, count):
-        return self.collection.library.insert_one({"title": title, "writer": writer, "count": count, "renter": ""})
+    def add_library(self, title, writer, count, image):
+        return self.collection.library.insert_one({"title": title, "writer": writer,
+                                                   "count": count, "renter": [], "image": image})
 
     def get_library(self):
         return self.collection.library.find()
+
+    def rent_library(self, title, renter, date, count):
+        return self.collection.library.update_one({"title": title},
+                                                  {'$push': {'renter': {"user_id": renter, "date": date}},
+                                                   '$set': {'count': count-1}})
+
+    def delete_library(self, title):
+        return self.collection.library.delete_one({"title": title})
+
+    def find_library(self, title):
+        return self.collection.library.find_one({"title": title})
 
     def edit_user_profile(self, json_request):
         return self.collection.member.update_one({'id': json_request['id']},
