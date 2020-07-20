@@ -1,12 +1,11 @@
 from db_connector import DBConnector
 
-db = DBConnector()
-
 
 class DBManager(object):
 
     def __init__(self):
-        self.collection = db.collection_fancuk
+        self.db = DBConnector()
+        self.collection = self.db.collection_fancuk
 
     def get_user_info(self, id):
         return self.collection.member.find_one({"id": id})
