@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
 from db_manager import DBManager
+import datetime
 
 app = Flask(__name__)
 mongo = DBManager()
@@ -28,6 +29,17 @@ def login(*args):
             json_request = {'login': 'False'}
     else:
         json_request = {'login': 'False'}
+
+    return jsonify(json_request)
+
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    check = mongo.add_user_info(request.json)
+    if check is not None:
+        json_request = {'register' : 'True'}
+    else:
+        json_request = {'register' : 'False'}
 
     return jsonify(json_request)
 
