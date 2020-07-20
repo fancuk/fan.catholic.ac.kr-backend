@@ -12,9 +12,13 @@ def hello_world():
 
 
 @app.route('/api/login', methods=['POST'])
-def login():
-    user_id = request.json['id']
-    user_pwd = request.json['pwd']
+@validate_params(
+    Param('id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True), #소문자와 숫자만 가능
+    Param('pwd', JSON, str, required=True)
+)
+def login(*args):
+    user_id = args[0]
+    user_pwd = args[1]
 
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
