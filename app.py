@@ -106,6 +106,17 @@ def delete_library():
 
 
 @app.route ('/api/profile/edit', methods=['POST'])
+@validate_params(
+    Param('id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True), #소문자와 숫자만 가능
+    Param('pwd', JSON, str, required=True),
+    Param('name', JSON, str, rules=[Pattern(r'^[가-힣]*$')], required=True),
+    Param('student_id', JSON, str, rules=[Pattern(r'^[0-9]+$')], required=True),
+    Param('grade', JSON, str, rules=[Pattern(r'\d')], required=True),
+    Param('semester', JSON, str, rules=[Pattern(r'\d')], required=True),
+    Param('phone', JSON, str, rules=[Pattern(r'\d{2,3}-\d{3,4}-\d{4}')], required=True),
+    Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True),
+    Param('level', JSON, str, rules=[Pattern(r'\d')], required=True)
+)
 def edit_profile():
     check = mongo.edit_user_profile(request.json)
     if check is not None:
