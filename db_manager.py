@@ -1,9 +1,6 @@
-from pymongo import MongoClient
+from db_connector import DBConnector
 
-db_id = "admin"
-db_passwd = "admin"
-mongo = MongoClient('mongodb://%s:%s@127.0.0.1:27017' % (db_id, db_passwd))
-
+db = DBConnector()
 
 class DBMannager:
 
@@ -11,20 +8,20 @@ class DBMannager:
         pass
 
     def get_user_info(self, id):
-        db = mongo.login
-        return db.login.find_one({"id": id})
+        collection = db.mongo.login
+        return collection.login.find_one({"id": id})
 
     def add_library(self, title, writer, count):
-        db = mongo.library
-        return db.book.insert_one({"title": title, "writer": writer, "count": count, "renter": ""})
+        collection = db.mongo.library
+        return collection.book.insert_one({"title": title, "writer": writer, "count": count, "renter": ""})
 
     def get_library(self):
-        db = mongo.library
-        return db.book.find()
+        collection = db.mongo.library
+        return collection.book.find()
 
     def edit_user_profile(self, json_request):
-        db = mongo.Member_List
-        return db.test_collection.update_one({'id': json_request['id']},
+        collection = db.mongo.Member_List
+        return collection.test_collection.update_one({'id': json_request['id']},
                                              {'$set':
                                                   {'passward': json_request['pwd'],
                                                    'name': json_request['name'],
@@ -37,4 +34,4 @@ class DBMannager:
                                                    }})
 
     def __del__(self):
-        mongo.close()
+        pass
