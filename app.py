@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
-from db_manager import DBMannager
+from db_manager import DBManager
 
 app = Flask(__name__)
-mongo = DBMannager()
+mongo = DBManager()
 
 
 @app.route('/')
@@ -22,7 +22,7 @@ def login(*args):
 
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
-        if user_pwd == user_info['password']:
+        if user_pwd == user_info['pwd']:
             json_request = {'login': 'True'}
         else:
             json_request = {'login': 'False'}
