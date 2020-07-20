@@ -32,6 +32,17 @@ def login(*args):
     return jsonify(json_request)
 
 
+@app.route('/api/register', methods=['POST'])
+def register():
+    check = mongo.add_user_info(request.json)
+    if check is not None:
+        json_request = {'register' : 'True'}
+    else:
+        json_request = {'register' : 'False'}
+
+    return jsonify(json_request)
+
+
 @app.route('/api/library/add', methods=['POST'])
 def add_library():
     title = request.json['title']
