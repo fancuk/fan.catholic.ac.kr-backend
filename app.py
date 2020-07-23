@@ -80,8 +80,7 @@ def rent_library():
     title = request.json['title']
     renter = request.json['renter']
     find_library = mongo.find_library(title)
-    count = find_library['count']
-    print(count)
+    count = int(find_library['count'])
     if count <= 0:
         json_request = {'rent': 'False'}
     else:
@@ -104,6 +103,20 @@ def delete_library():
         json_request = {'delete': 'True'}
     else:
         json_request = {'delete': 'False'}
+    return jsonify(json_request)
+
+
+@app.route('/api/library/return', methods=['PUT'])
+def return_library():
+    title = request.json['title']
+    renter = request.json['renter']
+    find_library = mongo.find_library(title)
+    count = int(find_library['count'])
+    check = mongo.return_library(title, renter, count)
+    if check is not None:
+        json_request = {'return': 'True'}
+    else:
+        json_request = {'return': 'False'}
     return jsonify(json_request)
 
 
