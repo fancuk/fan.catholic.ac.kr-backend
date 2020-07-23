@@ -21,9 +21,9 @@ class DBManager(object):
                                                   'email': json_request['email'],
                                                   'level': 1})
 
-    def add_library(self, title, writer, count, image):
-        return self.collection.library.insert_one({"title": title, "writer": writer,
-                                                   "count": count, "renter": [], "image": image})
+    def add_library(self, json_request):
+        return self.collection.library.insert_one({"title": json_request[0], "writer": json_request[1],
+                                                   "count": json_request[2], "renter": [], "image": json_request[3]})
 
     def get_library(self):
         return self.collection.library.find()

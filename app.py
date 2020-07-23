@@ -44,12 +44,14 @@ def register():
 
 
 @app.route('/api/library/add', methods=['POST'])
-def add_library():
-    title = request.json['title']
-    writer = request.json['writer']
-    count = request.json['count']
-    image = request.json['image']
-    check = mongo.add_library(title, writer, count, image)
+@validate_params(
+    Param('title', JSON, str,rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('count', JSON, str, rules=[Pattern(r'\d')], required=True),
+    Param('image', JSON, str, rules=[Pattern(r'^.{5,30}$')], required=True)
+)
+def add_library(*args):
+    check = mongo.add_library(args)
 
     if check is not None:
         json_request = {'add': 'True'}
