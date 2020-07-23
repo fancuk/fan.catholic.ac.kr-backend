@@ -126,4 +126,3 @@ def edit_profile(*args):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-    # 그대로 사용 가넝
