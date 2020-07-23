@@ -96,9 +96,9 @@ def rent_library():
     return jsonify(json_request)
 
 
-@app.route('/api/library/delete', methods=['POST'])
+@app.route('/api/library/delete', methods=['DELETE'])
 def delete_library():
-    title = request.json['title']
+    title = request.args.get('title')
     check = mongo.delete_library(title)
     if check is not None:
         json_request = {'delete': 'True'}
