@@ -71,6 +71,13 @@ def register():
     return jsonify(json_request)
 
 
+@login_required
+@app.route('/api/logout')
+def logout():
+    logout_user()
+    return {'logout': 'True'}
+
+
 @app.route('/api/library/add', methods=['POST'])
 @validate_params(
     Param('title', JSON, str,rules=[Pattern(r'^.{1,30}$')], required=True),
