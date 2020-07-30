@@ -1,9 +1,15 @@
 from flask import Flask, jsonify, request
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
 from db_manager import DBManager
+from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 import time
+import os
+
 app = Flask(__name__)
 mongo = DBManager()
+app.secret_key = os.urandom(24)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 @app.route('/')
@@ -11,18 +17,35 @@ def hello_world():
     return 'Hello World!'
 
 
+class User(UserMixin):
+    def __init__(self, user_id, user_pwd, authenticated=True):
+        self.user_id = user_id
+        self.user_pwd = user_pwd
+        self.authenticated = authenticated
+
+    def try_login(self, db_user_pwd):
+        return self.user_pwd == db_user_pwd
+
+    def get_user_id(self):
+        return self.user_id
+
+    def is_authenticated(self):
+        return self.authenticated
+
+
 @app.route('/api/login', methods=['POST'])
 @validate_params(
-    Param('id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True), #소문자와 숫자만 가능
-    Param('pwd', JSON, str, required=True)
+    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True), #소문자와 숫자만 가능
+    Param('user_pwd', JSON, str, required=True)
 )
 def login(*args):
     user_id = args[0]
     user_pwd = args[1]
-
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['pwd']:
+            user = User(user_id, user_pwd)
+            login_user(user)
             json_request = {'login': 'True'}
         else:
             json_request = {'login': 'False'}
@@ -30,6 +53,11 @@ def login(*args):
         json_request = {'login': 'False'}
 
     return jsonify(json_request)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
 
 
 @app.route('/api/register', methods=['POST'])
