@@ -56,5 +56,8 @@ class DBManager(object):
                                                   'email': json_request[7]
                                                   }})
 
+    def get_user_library(self, id):
+        return self.collection.library.find({'renter': {'$elemMatch': {'user_id': id}}})
+
     def __del__(self):
         pass

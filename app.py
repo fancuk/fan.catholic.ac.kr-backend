@@ -155,7 +155,7 @@ def return_library():
     return jsonify(json_request)
 
 
-@app.route ('/api/profile/edit', methods=['POST'])
+@app.route ('/api/profile/edit', methods=['PUT'])
 @validate_params(
     Param('id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True), #소문자와 숫자만 가능
     Param('pwd', JSON, str, required=True),
@@ -172,6 +172,19 @@ def edit_profile(*args):
         return {'edit': 'True'}
     else:
         return {'edit': 'False'}
+
+@app.route('/api/user/library', methods=['GET'])
+def my_library():
+    user_id = request.args.get('user_id')
+    check = mongo.get_user_library(user_id)
+
+    docs = []
+    for doc in check:
+        doc.pop('_id')  # 개소름
+        docs.append(doc)
+
+    return jsonify(docs)
+
 
 
 if __name__ == '__main__':
