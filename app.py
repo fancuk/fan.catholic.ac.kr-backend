@@ -173,18 +173,18 @@ def edit_profile(*args):
     else:
         return {'edit': 'False'}
 
-@app.route('/api/library/list', methods=['GET'])
-def list_library():
-    check = mongo.get_library()
-
-    if check is None:
-        return {'list' : 'False'}
+@app.route('/api/user/library', methods=['GET'])
+def my_library():
+    id = request.args.get('id')
+    check = mongo.get_user_library(id)
 
     docs = []
     for doc in check:
-        doc.pop('_id') #개소름
+        doc.pop('_id')  # 개소름
         docs.append(doc)
+
     return jsonify(docs)
+
 
 
 if __name__ == '__main__':
