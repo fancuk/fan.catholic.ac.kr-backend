@@ -175,8 +175,8 @@ def edit_profile(*args):
 
 @app.route('/api/user/library', methods=['GET'])
 def my_library():
-    id = request.args.get('id')
-    check = mongo.get_user_library(id)
+    user_id = request.args.get('user_id')
+    check = mongo.get_user_library(user_id)
 
     docs = []
     for doc in check:
