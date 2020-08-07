@@ -86,14 +86,17 @@ def logout():
     Param('image', JSON, str, rules=[Pattern(r'^.{5,30}$')], required=True)
 )
 def add_library(*args):
-    check = mongo.add_library(args)
+    overlap = mongo.find_library(args[0])
+    if overlap is None:
+        check = mongo.add_library(args)
+        if check is not None:
+            json_request = {'add': 'True'}
+        else:
+            json_request = {'add': 'False'}
 
-    if check is not None:
-        json_request = {'add': 'True'}
+        return jsonify(json_request)
     else:
-        json_request = {'add': 'False'}
-
-    return jsonify(json_request)
+        return jsonify(json_request={'error_code': 409, 'error_msg': '책 중복'})
 
 
 @app.route('/api/library/list', methods=['GET'])
@@ -154,6 +157,18 @@ def return_library():
         json_request = {'return': 'False'}
     return jsonify(json_request)
 
+@app.route('/api/library/edit', methods=['POST'])
+@validate_params(
+    Param('title', JSON, str,rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('edit_count', JSON, str, rules=[Pattern(r'\d')], required=True),
+    Param('edit_image', JSON, str, rules=[Pattern(r'^.{5,30}$')], required=True)
+)
+def edit_library(*args):
+    check = mongo.edit_library(args)
+    if check is not None:
+        return {'edit': 'True'}
+    else:
+        return {'edit': 'False'}
 
 @app.route('/api/profile/edit', methods=['PUT'])
 @validate_params(
@@ -172,6 +187,7 @@ def edit_profile(*args):
         return {'edit': 'True'}
     else:
         return {'edit': 'False'}
+
 
 @app.route('/api/user/library', methods=['GET'])
 def my_library():

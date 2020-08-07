@@ -7,11 +7,11 @@ class DBManager(object):
         self.db = DBConnector()
         self.collection = self.db.collection_fancuk
 
-    def get_user_info(self, id):
-        return self.collection.member.find_one({"id": id})
+    def get_user_info(self, user_id):
+        return self.collection.member.find_one({"user_id": user_id})
 
     def add_user_info(self, json_request):
-        return self.collection.member.insert_one({'id': json_request['id'],
+        return self.collection.member.insert_one({'user_id': json_request['user_id'],
                                                   'pwd': json_request['pwd'],
                                                   'name': json_request['name'],
                                                   'student_id': json_request['student_id'],
@@ -66,8 +66,8 @@ class DBManager(object):
     def get_user_library(self, user_id):
         return self.collection.library.find({'renter': {'$elemMatch': {'user_id': user_id}}})
 
-    def delete_user(self, id):
-        return self.collection.member.delete_one({'id': id})
+    def delete_user(self, user_id):
+        return self.collection.member.delete_one({'user_id': user_id})
 
     def __del__(self):
         pass
