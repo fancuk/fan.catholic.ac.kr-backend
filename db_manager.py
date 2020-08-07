@@ -44,8 +44,15 @@ class DBManager(object):
                                                   {'$pull': {'renter': {'user_id': renter}},
                                                    '$set': {'count': count+1}})
 
+    def edit_library(self, json_request):
+        return self.collection.library.update_one({'title': json_request[0]},
+                                                  {'$set':
+                                                       {'count': json_request[1],
+                                                        'image': json_request[2]
+                                                        }})
+
     def edit_user_profile(self, json_request):
-        return self.collection.member.update_one({'id': json_request[0]},
+        return self.collection.member.update_one({'user_id': json_request[0]},
                                             {'$set':
                                                  {'pwd': json_request[1],
                                                   'name': json_request[2],
@@ -56,8 +63,11 @@ class DBManager(object):
                                                   'email': json_request[7]
                                                   }})
 
-    def get_user_library(self, id):
-        return self.collection.library.find({'renter': {'$elemMatch': {'user_id': id}}})
+    def get_user_library(self, user_id):
+        return self.collection.library.find({'renter': {'$elemMatch': {'user_id': user_id}}})
+
+    def delete_user(self, id):
+        return self.collection.member.delete_one({'id': id})
 
     def __del__(self):
         pass
