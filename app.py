@@ -35,7 +35,7 @@ class User(UserMixin):
 
 @app.route('/api/login', methods=['POST'])
 @validate_params(
-    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True), #소문자와 숫자만 가능
+    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('user_pwd', JSON, str, required=True)
 )
 def login(*args):
@@ -64,9 +64,9 @@ def load_user(user_id):
 def register():
     check = mongo.add_user_info(request.json)
     if check is not None:
-        json_request = {'register' : 'True'}
+        json_request = {'register': 'True'}
     else:
-        json_request = {'register' : 'False'}
+        json_request = {'register': 'False'}
 
     return jsonify(json_request)
 
@@ -80,7 +80,7 @@ def logout():
 
 @app.route('/api/library/add', methods=['POST'])
 @validate_params(
-    Param('title', JSON, str,rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('count', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('image', JSON, str, rules=[Pattern(r'^.{5,30}$')], required=True)
@@ -108,7 +108,7 @@ def list_library():
 
     docs = []
     for doc in check:
-        doc.pop('_id') #개소름
+        doc.pop('_id')  # 개소름
         docs.append(doc)
     return jsonify(docs)
 
@@ -170,9 +170,9 @@ def edit_library(*args):
     else:
         return {'edit': 'False'}
 
-@app.route ('/api/profile/edit', methods=['PUT'])
+@app.route('/api/profile/edit', methods=['PUT'])
 @validate_params(
-    Param('id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True), #소문자와 숫자만 가능
+    Param('id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('pwd', JSON, str, required=True),
     Param('name', JSON, str, rules=[Pattern(r'^[가-힣]*$')], required=True),
     Param('student_id', JSON, str, rules=[Pattern(r'^[0-9]+$')], required=True),
@@ -198,9 +198,14 @@ def my_library():
     for doc in check:
         doc.pop('_id')  # 개소름
         docs.append(doc)
-
     return jsonify(docs)
 
+
+@app.route('/api/delete/user', methods=['DELETE'])
+def delete_user():
+    user_id = request.args.get('user_id')
+    check = mongo.delete_user(user_id)
+    return {'delete': 'True'}
 
 
 if __name__ == '__main__':
