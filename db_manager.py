@@ -44,6 +44,13 @@ class DBManager(object):
                                                   {'$pull': {'renter': {'user_id': renter}},
                                                    '$set': {'count': count+1}})
 
+    def edit_library(self, json_request):
+        return self.collection.library.update_one({'title': json_request[0]},
+                                                  {'$set':
+                                                       {'count': json_request[1],
+                                                        'image': json_request[2]
+                                                        }})
+
     def edit_user_profile(self, json_request):
         return self.collection.member.update_one({'id': json_request[0]},
                                             {'$set':
