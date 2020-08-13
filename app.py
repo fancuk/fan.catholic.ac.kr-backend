@@ -61,8 +61,18 @@ def load_user(user_id):
 
 
 @app.route('/api/register', methods=['POST'])
-def register():
-    check = mongo.add_user_info(request.json)
+@validate_params(
+    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
+    Param('pwd', JSON, str, required=True),
+    Param('name', JSON, str, rules=[Pattern(r'^[가-힣]*$')], required=True),
+    Param('student_id', JSON, str, rules=[Pattern(r'^[0-9]+$')], required=True),
+    Param('grade', JSON, str, rules=[Pattern(r'\d')], required=True),
+    Param('semester', JSON, str, rules=[Pattern(r'\d')], required=True),
+    Param('phone', JSON, str, rules=[Pattern(r'\d{2,3}-\d{3,4}-\d{4}')], required=True),
+    Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True)
+)
+def register(*args):
+    check = mongo.add_user_info(args)
     if check is not None:
         json_request = {'register': 'True'}
     else:
@@ -153,6 +163,7 @@ def return_library():
         json_request = {'return': 'False'}
     return jsonify(json_request)
 
+
 @app.route('/api/library/edit', methods=['POST'])
 @validate_params(
     Param('title', JSON, str,rules=[Pattern(r'^.{1,30}$')], required=True),
@@ -165,6 +176,7 @@ def edit_library(*args):
         return {'edit': 'True'}
     else:
         return {'edit': 'False'}
+
 
 @app.route('/api/profile/edit', methods=['PUT'])
 @validate_params(
