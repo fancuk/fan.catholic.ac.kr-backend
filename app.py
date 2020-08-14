@@ -88,6 +88,16 @@ def logout():
     return {'logout': 'True'}
 
 
+@app.route('/api/reset/pwd', methods=['POST'])
+@validate_params(
+    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)  # 소문자와 숫자만 가능
+)
+def reset_pwd(*args):
+    pwd = 'fancuk'
+    check = mongo.reset_pwd(args[0], pwd)
+    return {'reset': 'True'}
+
+
 @app.route('/api/library/add', methods=['POST'])
 @validate_params(
     Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
