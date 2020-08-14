@@ -1,11 +1,13 @@
 from flask import Flask, jsonify, request
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
+from flask_cors import CORS
 from db_manager import DBManager
 from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 import time
 import os
 
 app = Flask(__name__)
+CORS(app)
 mongo = DBManager()
 app.secret_key = os.urandom(24)
 login_manager = LoginManager()
