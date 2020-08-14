@@ -43,7 +43,7 @@ def login(*args):
     user_pwd = args[1]
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
-        if user_pwd == user_info['pwd']:
+        if user_pwd == user_info['user_pwd']:
             user = User(user_id, user_pwd)
             login_user(user)
             json_request = {'login': 'True'}
@@ -63,7 +63,7 @@ def load_user(user_id):
 @app.route('/api/register', methods=['POST'])
 @validate_params(
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
-    Param('pwd', JSON, str, required=True),
+    Param('user_pwd', JSON, str, required=True),
     Param('name', JSON, str, rules=[Pattern(r'^[가-힣]*$')], required=True),
     Param('student_id', JSON, str, rules=[Pattern(r'^[0-9]+$')], required=True),
     Param('grade', JSON, str, rules=[Pattern(r'\d')], required=True),
@@ -93,8 +93,8 @@ def logout():
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)  # 소문자와 숫자만 가능
 )
 def reset_pwd(*args):
-    pwd = 'fancuk'
-    check = mongo.reset_pwd(args[0], pwd)
+    user_pwd = 'fancuk'
+    check = mongo.reset_pwd(args[0], user_pwd)
     return {'reset': 'True'}
 
 
@@ -191,7 +191,7 @@ def edit_library(*args):
 @app.route('/api/profile/edit', methods=['PUT'])
 @validate_params(
     Param('id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
-    Param('pwd', JSON, str, required=True),
+    Param('user_pwd', JSON, str, required=True),
     Param('name', JSON, str, rules=[Pattern(r'^[가-힣]*$')], required=True),
     Param('student_id', JSON, str, rules=[Pattern(r'^[0-9]+$')], required=True),
     Param('grade', JSON, str, rules=[Pattern(r'\d')], required=True),
