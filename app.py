@@ -228,11 +228,11 @@ def delete_user():
     return {'delete': 'True'}
 
 
-@app.route('/api/edit/user/level', methods=['PUT'])
+@app.route('/api/manage/edit', methods=['PUT'])
 def edit_user_level():
     user_id = request.json['user_id']
-    edit_level = request.json['edit_level']
-    check = mongo.edit_user_level(user_id, edit_level)
+    level = request.json['level']
+    check = mongo.edit_user_level(user_id, level)
     if check is not None:
         return {'edit': 'True'}
     else:
