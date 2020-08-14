@@ -226,5 +226,16 @@ def delete_user():
     return {'delete': 'True'}
 
 
+@app.route('/api/edit/user/level', methods=['PUT'])
+def edit_user_level():
+    user_id = request.json['user_id']
+    edit_level = request.json['edit_level']
+    check = mongo.edit_user_level(user_id, edit_level)
+    if check is not None:
+        return {'edit': 'True'}
+    else:
+        return {'edit': 'False'}
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
