@@ -21,6 +21,10 @@ class DBManager(object):
                                                   'email': json_request[7],
                                                   'level': 1})
 
+    def reset_pwd(self, json_request, pwd):
+        return self.collection.member.update_one({'user_id': json_request},
+                                                 {'$set': {'pwd': pwd}})
+
     def add_library(self, json_request):
         return self.collection.library.insert_one({"title": json_request[0], "writer": json_request[1],
                                                    "count": json_request[2], "renter": [], "image": json_request[3]})
