@@ -82,11 +82,5 @@ class DBManager(object):
 
         })
 
-    def get_freeboard_list(self):
-        return self.collection.board.find()
-
-    def add_freeboard(self,user_id, title, text):
-        return self.collection.name.find()
-
     def __del__(self):
         pass
