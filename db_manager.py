@@ -73,11 +73,11 @@ class DBManager(object):
     def delete_user(self, user_id):
         return self.collection.member.delete_one({'user_id': user_id})
 
-    def edit_user_level(self, user_id, edit_level):
+    def edit_user_level(self, user_id, level):
         return self.collection.member.update_one({'user_id': user_id},
                                                  {'$set':
                                                       {
-                                                          'level': edit_level
+                                                          'level': level
                                                       }
 
         })
