@@ -12,7 +12,7 @@ class DBManager(object):
 
     def add_user_info(self, json_request):
         return self.collection.member.insert_one({'user_id': json_request[0],
-                                                  'pwd': json_request[1],
+                                                  'user_pwd': json_request[1],
                                                   'name': json_request[2],
                                                   'student_id': json_request[3],
                                                   'grade': json_request[4],
@@ -21,9 +21,9 @@ class DBManager(object):
                                                   'email': json_request[7],
                                                   'level': 1})
 
-    def reset_pwd(self, json_request, pwd):
+    def reset_pwd(self, json_request, user_pwd):
         return self.collection.member.update_one({'user_id': json_request},
-                                                 {'$set': {'pwd': pwd}})
+                                                 {'$set': {'user_pwd': user_pwd}})
 
     def add_library(self, json_request):
         return self.collection.library.insert_one({"title": json_request[0], "writer": json_request[1],
@@ -58,7 +58,7 @@ class DBManager(object):
     def edit_user_profile(self, json_request):
         return self.collection.member.update_one({'user_id': json_request[0]},
                                             {'$set':
-                                                 {'pwd': json_request[1],
+                                                 {'user_pwd': json_request[1],
                                                   'name': json_request[2],
                                                   'student_id': json_request[3],
                                                   'grade': json_request[4],
