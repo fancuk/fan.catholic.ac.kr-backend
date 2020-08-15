@@ -20,19 +20,8 @@ def hello_world():
 
 
 class User(UserMixin):
-    def __init__(self, user_id, user_pwd, authenticated=True):
-        self.user_id = user_id
-        self.user_pwd = user_pwd
-        self.authenticated = authenticated
-
-    def try_login(self, db_user_pwd):
-        return self.user_pwd == db_user_pwd
-
-    def get_user_id(self):
-        return self.user_id
-
-    def is_authenticated(self):
-        return self.authenticated
+    def __init__(self, user_id):
+        self.id = user_id
 
 
 @app.route('/api/login', methods=['POST'])
@@ -46,9 +35,10 @@ def login(*args):
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
-            user = User(user_id, user_pwd)
-            login_user(user)
-            json_request = {'login': 'True'}
+            user = User(user_id)
+            user.authenticated = True
+            login_user(user, True)
+            json_request = {'user_id': user.get_id(), 'token': 'hello'}
         else:
             json_request = {'login': 'False'}
     else:
