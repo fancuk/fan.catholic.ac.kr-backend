@@ -38,7 +38,7 @@ def login(*args):
             user = User(user_id)
             user.authenticated = True
             login_user(user, True)
-            json_request = {'user_id': user.get_id(), 'token': 'hello'}
+            json_request = {'user_id': user.get_id()}
         else:
             json_request = {'login': 'False'}
     else:
