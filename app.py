@@ -246,6 +246,24 @@ def add_board(*args):
         json_request = {'add': 'True'}
 
     return jsonify(json_request)
+  
+  
+@app.route('/api/board/list', methods=['GET'])
+@validate_params(
+    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def list_board(*args):
+    board_name = request.args.get(args)
+    check = mongo.get_board(args)
+
+    if check is None:
+        return {'list': 'False'}
+
+    docs = []
+    for doc in check:  # 개소름
+        doc.pop('_id')
+        docs.append(doc)
+    return jsonify(docs)
 
 
 if __name__ == '__main__':
