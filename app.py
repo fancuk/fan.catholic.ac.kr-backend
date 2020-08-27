@@ -229,5 +229,23 @@ def edit_user_level():
         return {'edit': 'False'}
 
 
+@app.route('/api/board/list', methods=['GET'])
+@validate_params(
+    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def list_board(*args):
+    board_name = request.args.get(args)
+    check = mongo.get_board(args)
+
+    if check is None:
+        return {'list': 'False'}
+
+    docs = []
+    for doc in check:  # 개소름
+        doc.pop('_id')
+        docs.append(doc)
+    return jsonify(docs)
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
