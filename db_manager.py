@@ -81,5 +81,18 @@ class DBManager(object):
                                                      }
                                                  })
 
+    def add_board(self, json_request, date):
+        check = None
+        if json_request[0] == 'freeBoard':
+            check = self.collection.freeBoard.insert_one(
+                {'title': json_request[1], 'writer': json_request[2], 'content': json_request[3], 'date': date})
+        elif json_request[0] == 'noticeBoard':
+            check = self.collection.noticeBoard.insert_one(
+                {'title': json_request[1], 'writer': json_request[2], 'content': json_request[3], 'date': date})
+        elif json_request[0] == 'studyBoard':
+            check = self.collection.studyBoard.insert_one(
+                {'title': json_request[1], 'writer': json_request[2], 'content': json_request[3], 'date': date})
+        return check
+
     def __del__(self):
         pass

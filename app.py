@@ -168,7 +168,7 @@ def return_library():
 
 @app.route('/api/library/edit', methods=['POST'])
 @validate_params(
-    Param('title', JSON, str,rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('edit_count', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('edit_image', JSON, str, rules=[Pattern(r'^.{5,30}$')], required=True)
 )
@@ -227,6 +227,25 @@ def edit_user_level():
         return {'edit': 'True'}
     else:
         return {'edit': 'False'}
+
+
+@app.route('/api/board/add', methods=['POST'])
+@validate_params(
+    Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True)
+)
+def add_board(*args):
+    now = time.localtime()
+    now_time = str(now.tm_year) + '-' + str(now.tm_mon) + '-' + str(now.tm_mday)
+    overlap = mongo.add_board(args, now_time)
+    if overlap is None:
+        json_request = {'add': 'False'}
+    else:
+        json_request = {'add': 'True'}
+
+    return jsonify(json_request)
 
 
 if __name__ == '__main__':
