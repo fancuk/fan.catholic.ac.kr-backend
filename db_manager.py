@@ -29,8 +29,8 @@ class DBManager(object):
         return self.collection.library.insert_one({'title': json_request[0], 'writer': json_request[1],
                                                    'count': json_request[2], 'renter': [], 'image': json_request[3]})
 
-    def get_library(self):
-        return self.collection.library.find()
+    def get_library(self, page):
+        return self.collection.library.find().limit(10).skip((page-1)*10)
 
     def rent_library(self, title, renter, date, count):
         return self.collection.library.update_one({'title': title},
@@ -51,8 +51,10 @@ class DBManager(object):
     def edit_library(self, json_request):
         return self.collection.library.update_one({'title': json_request[0]},
                                                   {'$set':
-                                                       {'count': json_request[1],
-                                                        'image': json_request[2]
+                                                       {'title': json_request[1],
+                                                        'writer': json_request[2],
+                                                        'count': json_request[3],
+                                                        'image': json_request[4]
                                                         }})
 
     def edit_user_profile(self, json_request):
@@ -101,6 +103,14 @@ class DBManager(object):
             return self.collection.noticeBoard.find()
         elif json_request[0] == 'studyBoard':
             return self.collection.studyBoard.find()
+          
+    def delete_board(self, board_name, seqNo):
+    if board_name == 'freeBoard':
+        return self.collection.freeBoard.delete_one({'seqNo': seqNo})
+    elif board_name == 'noticeBoard':
+        return self.collection.noticeBoard.delete_one({'seqNo': seqNo})
+    elif board_name == 'studyBoard':
+        return self.collection.studyBoard.delete_one({'seqNo': seqNo})
 
     def get_token(self, user_id):
         return self.collection.token.find_one({'user_id': user_id})
