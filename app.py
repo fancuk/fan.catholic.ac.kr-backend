@@ -144,6 +144,8 @@ def return_library():
 @app.route('/api/library/edit', methods=['POST'])
 @validate_params(
     Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('edit_title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('edit_writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('edit_count', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('edit_image', JSON, str, rules=[Pattern(r'^.{5,30}$')], required=True)
 )
