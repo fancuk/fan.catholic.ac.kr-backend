@@ -51,8 +51,10 @@ class DBManager(object):
     def edit_library(self, json_request):
         return self.collection.library.update_one({'title': json_request[0]},
                                                   {'$set':
-                                                       {'count': json_request[1],
-                                                        'image': json_request[2]
+                                                       {'title': json_request[1],
+                                                        'writer': json_request[2],
+                                                        'count': json_request[3],
+                                                        'image': json_request[4]
                                                         }})
 
     def edit_user_profile(self, json_request):
