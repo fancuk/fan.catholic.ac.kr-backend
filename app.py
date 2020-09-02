@@ -2,11 +2,13 @@ from flask import Flask, jsonify, request
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
 from flask_cors import CORS
 from db_manager import DBManager
+from authentication import Authentication
 import time
 
 app = Flask(__name__)
 CORS(app)
 mongo = DBManager()
+auth = Authentication()
 
 
 @app.route('/')
@@ -25,13 +27,25 @@ def login(*args):
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
-            json_request = {'user_id': user_id}
+            auth.token_recreation(user_id)
+            json_request = {'login': 'True', 'user_id': user_id, 'token': auth.token_get(user_id)}
         else:
             json_request = {'login': 'False'}
     else:
         json_request = {'login': 'False'}
 
     return jsonify(json_request)
+
+
+@app.route('/api/logout', methods=['POST'])
+@validate_params(
+    Param('token', JSON, str, rules=[Pattern(r'^.{1,50}$')], required=True)
+)
+def logout(*args):
+    if auth.token_expired(args[0]).modified_count == 1:
+        return {'logout': 'True'}
+    else:
+        return {'logout': 'False'}
 
 
 @app.route('/api/register', methods=['POST'])
@@ -48,6 +62,7 @@ def login(*args):
 def register(*args):
     check = mongo.add_user_info(args)
     if check is not None:
+        auth.token_creation(args[0])
         json_request = {'register': 'True'}
     else:
         json_request = {'register': 'False'}
