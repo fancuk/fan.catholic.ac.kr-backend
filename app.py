@@ -212,7 +212,8 @@ def edit_user_level():
     Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
-    Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True)
+    Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('seqNo', JSON, str, rules=[Pattern(r'\d')], required=True)
 )
 def add_board(*args):
     now = time.localtime()
@@ -242,6 +243,14 @@ def list_board(*args):
         doc.pop('_id')
         docs.append(doc)
     return jsonify(docs)
+
+
+@app.route('/api/board/delete', methods=['DELETE'])
+def delete_board():
+    board_name = request.args.get('board_name')
+    seqNo = request.args.get('seqNo')
+    check = mongo.delete_board(board_name, seqNo)
+    return {'delete': 'True'}
 
 
 if __name__ == '__main__':

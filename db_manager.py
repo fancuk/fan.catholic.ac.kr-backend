@@ -104,5 +104,13 @@ class DBManager(object):
         elif json_request[0] == 'studyBoard':
             return self.collection.studyBoard.find()
 
+    def delete_board(self, board_name, seqNo):
+        if board_name == 'freeBoard':
+            return self.collection.freeBoard.delete_one({'seqNo': seqNo})
+        elif board_name == 'noticeBoard':
+            return self.collection.noticeBoard.delete_one({'seqNo': seqNo})
+        elif board_name == 'studyBoard':
+            return self.collection.studyBoard.delete_one({'seqNo': seqNo})
+
     def __del__(self):
         pass
