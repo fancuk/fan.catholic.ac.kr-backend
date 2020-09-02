@@ -2,26 +2,16 @@ from flask import Flask, jsonify, request
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
 from flask_cors import CORS
 from db_manager import DBManager
-from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 import time
-import os
 
 app = Flask(__name__)
 CORS(app)
 mongo = DBManager()
-app.secret_key = os.urandom(24)
-login_manager = LoginManager()
-login_manager.init_app(app)
 
 
 @app.route('/')
 def hello_world():
     return 'Hello World!'
-
-
-class User(UserMixin):
-    def __init__(self, user_id):
-        self.id = user_id
 
 
 @app.route('/api/login', methods=['POST'])
@@ -35,21 +25,13 @@ def login(*args):
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
-            user = User(user_id)
-            user.authenticated = True
-            login_user(user, True)
-            json_request = {'user_id': user.get_id()}
+            json_request = {'user_id': user_id}
         else:
             json_request = {'login': 'False'}
     else:
         json_request = {'login': 'False'}
 
     return jsonify(json_request)
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User(user_id)
 
 
 @app.route('/api/register', methods=['POST'])
@@ -71,13 +53,6 @@ def register(*args):
         json_request = {'register': 'False'}
 
     return jsonify(json_request)
-
-
-@login_required
-@app.route('/api/logout')
-def logout():
-    logout_user()
-    return {'logout': 'True'}
 
 
 @app.route('/api/reset/pwd', methods=['POST'])
