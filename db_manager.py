@@ -29,8 +29,8 @@ class DBManager(object):
         return self.collection.library.insert_one({'title': json_request[0], 'writer': json_request[1],
                                                    'count': json_request[2], 'renter': [], 'image': json_request[3]})
 
-    def get_library(self):
-        return self.collection.library.find()
+    def get_library(self, page):
+        return self.collection.library.find().limit(10).skip((page-1)*10)
 
     def rent_library(self, title, renter, date, count):
         return self.collection.library.update_one({'title': title},

@@ -88,7 +88,8 @@ def add_library(*args):
 
 @app.route('/api/library/list', methods=['GET'])
 def list_library():
-    check = mongo.get_library()
+    page = request.args.get('page')
+    check = mongo.get_library(int(page))
 
     if check is None:
         return {'list': 'False'}
