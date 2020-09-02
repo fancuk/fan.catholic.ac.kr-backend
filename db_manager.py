@@ -103,14 +103,29 @@ class DBManager(object):
             return self.collection.noticeBoard.find()
         elif json_request[0] == 'studyBoard':
             return self.collection.studyBoard.find()
-
+          
     def delete_board(self, board_name, seqNo):
-        if board_name == 'freeBoard':
-            return self.collection.freeBoard.delete_one({'seqNo': seqNo})
-        elif board_name == 'noticeBoard':
-            return self.collection.noticeBoard.delete_one({'seqNo': seqNo})
-        elif board_name == 'studyBoard':
-            return self.collection.studyBoard.delete_one({'seqNo': seqNo})
+    if board_name == 'freeBoard':
+        return self.collection.freeBoard.delete_one({'seqNo': seqNo})
+    elif board_name == 'noticeBoard':
+        return self.collection.noticeBoard.delete_one({'seqNo': seqNo})
+    elif board_name == 'studyBoard':
+        return self.collection.studyBoard.delete_one({'seqNo': seqNo})
+
+    def get_token(self, user_id):
+        return self.collection.token.find_one({'user_id': user_id})
+
+    def find_token(self, token):
+        return self.collection.token.find_one({'token': token})
+
+    def set_token(self, user_id, token, expired_time):
+        return self.collection.token.insert_one({'user_id': user_id, 'token': token, 'time': expired_time})
+
+    def update_token(self, user_id, token, expired_time):
+        return self.collection.token.update_one({'user_id': user_id}, {'$set': {'token': token, 'time': expired_time}})
+
+    def expired_token(self, token, expired_time):
+        return self.collection.token.update_one({'token': token}, {'$set': {'time': expired_time}})
 
     def __del__(self):
         pass
