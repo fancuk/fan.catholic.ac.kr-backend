@@ -285,5 +285,20 @@ def detail_board():
         return check
 
 
+@app.route('/api/board/edit', methods=['PUT'])
+def edit_board():
+    board_name = request.json['board_name']
+    title = request.json['title']
+    writer = request.json['writer']
+    date = request.json['date']
+    edit_title = request.json['edit_title']
+    edit_content = request.json['edit_content']
+    check = mongo.edit_board(board_name, title, writer, date, edit_title, edit_content)
+    if check.modified_count != 0:
+        return {'edit': 'True'}
+    else:
+        return {'edit': 'False'}
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
