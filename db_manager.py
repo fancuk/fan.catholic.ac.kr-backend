@@ -104,13 +104,13 @@ class DBManager(object):
         elif json_request[0] == 'studyBoard':
             return self.collection.studyBoard.find()
           
-    def delete_board(self, board_name, seqNo):
+    def delete_board(self, board_name, title, writer, date):
         if board_name == 'freeBoard':
-            return self.collection.freeBoard.delete_one({'seqNo': seqNo})
+            return self.collection.freeBoard.delete_one({'title': title, 'writer': writer, 'date': date})
         elif board_name == 'noticeBoard':
-            return self.collection.noticeBoard.delete_one({'seqNo': seqNo})
+            return self.collection.noticeBoard.delete_one({'title': title, 'writer': writer, 'date': date})
         elif board_name == 'studyBoard':
-            return self.collection.studyBoard.delete_one({'seqNo': seqNo})
+            return self.collection.studyBoard.delete_one({'title': title, 'writer': writer, 'date': date})
 
     def get_token(self, user_id):
         return self.collection.token.find_one({'user_id': user_id})
