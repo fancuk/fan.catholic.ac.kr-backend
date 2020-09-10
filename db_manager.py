@@ -120,6 +120,29 @@ class DBManager(object):
         elif board_name == 'studyBoard':
             return self.collection.studyBoard.find_one({'title': title, 'writer': writer, 'date': date})
 
+    def edit_board(self, board_name, title, writer, date, edit_title, edit_content):
+        if board_name == 'freeBoard':
+            return self.collection.freeBoard.update_one({'title': title, 'writer': writer, 'date': date},
+                                                        {'$set':
+                                                             {
+                                                                 'title': edit_title,
+                                                                 'content': edit_content
+                                                             }})
+        elif board_name == 'noticeBoard':
+            return self.collection.noticeBoard.update_one({'title': title, 'writer': writer, 'date': date},
+                                                        {'$set':
+                                                             {
+                                                                 'title': edit_title,
+                                                                 'content': edit_content
+                                                             }})
+        elif board_name == 'studyBoard':
+            return self.collection.studyBoard.update_one({'title': title, 'writer': writer, 'date': date},
+                                                        {'$set':
+                                                             {
+                                                                 'title': edit_title,
+                                                                 'content': edit_content
+                                                             }})
+
     def get_token(self, user_id):
         return self.collection.token.find_one({'user_id': user_id})
 
