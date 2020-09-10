@@ -227,7 +227,7 @@ def edit_user_level():
     Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
-    Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True)
 )
 def add_board(*args):
     now = time.localtime()
@@ -267,6 +267,22 @@ def delete_board():
     date = request.args.get('date')
     check = mongo.delete_board(board_name, title, writer, date)
     return {'delete': 'True'}
+
+
+@app.route('/api/board/detail', methods=['GET'])
+def detail_board():
+    board_name = request.args.get('board_name')
+    title = request.args.get('title')
+    writer = request.args.get('writer')
+    date = request.args.get('date')
+    check = mongo.get_detail_board(board_name, title, writer, date)
+
+    check.pop('_id')
+
+    if check is None:
+        return {'detail': 'False'}
+    else:
+        return check
 
 
 if __name__ == '__main__':

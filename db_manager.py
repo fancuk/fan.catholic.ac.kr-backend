@@ -112,6 +112,14 @@ class DBManager(object):
         elif board_name == 'studyBoard':
             return self.collection.studyBoard.delete_one({'title': title, 'writer': writer, 'date': date})
 
+    def get_detail_board(self, board_name, title, writer, date):
+        if board_name == 'freeBoard':
+            return self.collection.freeBoard.find_one({'title': title, 'writer': writer, 'date': date})
+        elif board_name == 'noticeBoard':
+            return self.collection.noticeBoard.find_one({'title': title, 'writer': writer, 'date': date})
+        elif board_name == 'studyBoard':
+            return self.collection.studyBoard.find_one({'title': title, 'writer': writer, 'date': date})
+
     def get_token(self, user_id):
         return self.collection.token.find_one({'user_id': user_id})
 
