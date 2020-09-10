@@ -227,7 +227,7 @@ def edit_user_level():
     Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
-    Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True)
 )
 def add_board(*args):
     now = time.localtime()
