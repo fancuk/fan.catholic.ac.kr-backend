@@ -269,5 +269,21 @@ def delete_board():
     return {'delete': 'True'}
 
 
+@app.route('/api/board/detail', methods=['GET'])
+def detail_board():
+    board_name = request.args.get('board_name')
+    title = request.args.get('title')
+    writer = request.args.get('writer')
+    date = request.args.get('date')
+    check = mongo.get_detail_board(board_name, title, writer, date)
+
+    check.pop('_id')
+
+    if check is None:
+        return {'detail': 'False'}
+    else:
+        return check
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
