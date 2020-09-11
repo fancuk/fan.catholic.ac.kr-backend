@@ -205,10 +205,19 @@ def my_library():
 
 
 @app.route('/api/delete/user', methods=['DELETE'])
-def delete_user():
-    user_id = request.args.get('user_id')
-    check = mongo.delete_user(user_id)
-    return {'delete': 'True'}
+@validate_params(
+    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
+    Param('user_pwd', JSON, str, required=True)
+)
+def delete_user(*args):
+    user_id = request.args.get(args[0])
+    user_pwd = request.args.get(args[1])
+    user_info = mongo.get_user_info(user_id)
+    if user_info is not None:
+        if user_pwd == user_info['user_pwd']:
+            check = mongo.delete_user(user_id)
+            return {'delete': 'True'}
+    return {'delete': 'False'}
 
 
 @app.route('/api/user/list', methods=['GET'])
