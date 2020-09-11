@@ -211,6 +211,19 @@ def delete_user():
     return {'delete': 'True'}
 
 
+@app.route('/api/user/list', methods=['GET'])
+def user_list():
+    check = mongo.get_user_list()
+    docs = []
+    for doc in check:
+        doc.pop('_id')  # 개소름
+        docs.append(doc)
+    if check is not None:
+        return jsonify(docs)
+    else:
+        return {'list': 'False'}
+
+
 @app.route('/api/manage/edit', methods=['PUT'])
 def edit_user_level():
     user_id = request.json['user_id']
