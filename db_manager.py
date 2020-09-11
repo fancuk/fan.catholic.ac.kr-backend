@@ -10,6 +10,9 @@ class DBManager(object):
     def get_user_info(self, user_id):
         return self.collection.member.find_one({'user_id': user_id})
 
+    def get_user_list(self):
+        return self.collection.member.find()
+
     def add_user_info(self, json_request):
         return self.collection.member.insert_one({'user_id': json_request[0],
                                                   'user_pwd': json_request[1],
