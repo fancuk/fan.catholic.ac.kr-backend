@@ -224,12 +224,18 @@ def user_list():
         return {'list': 'False'}
 
 
-@app.route('/api/manage/edit', methods=['PUT'])
-def edit_user_level():
-    user_id = request.json['user_id']
-    level = request.json['level']
-    check = mongo.edit_user_level(user_id, level)
-    if check is not None:
+@app.route('/api/user/edit', methods=['PUT'])
+@validate_params(
+    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
+    Param('name', JSON, str, rules=[Pattern(r'^[가-힣]*$')], required=True),
+    Param('student_id', JSON, str, rules=[Pattern(r'^[0-9]+$')], required=True),
+    Param('grade', JSON, str, rules=[Pattern(r'\d')], required=True),
+    Param('semester', JSON, str, rules=[Pattern(r'\d')], required=True),
+    Param('level', JSON, str, rules=[Pattern(r'\d')], required=True)
+)
+def edit_user(*args):
+    check = mongo.edit_user(args)
+    if check.modified_count != 0:
         return {'edit': 'True'}
     else:
         return {'edit': 'False'}

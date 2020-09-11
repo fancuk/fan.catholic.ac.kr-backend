@@ -24,6 +24,17 @@ class DBManager(object):
                                                   'email': json_request[7],
                                                   'level': 1})
 
+    def edit_user(self, json_request):
+        return self.collection.member.update_one({'user_id': json_request[0]},
+                                                 {'$set':
+                                                      {
+                                                       'name': json_request[1],
+                                                       'student_id': json_request[2],
+                                                       'grade': json_request[3],
+                                                       'semester': json_request[4],
+                                                       'level': json_request[5]
+                                                       }})
+
     def reset_pwd(self, json_request, user_pwd):
         return self.collection.member.update_one({'user_id': json_request},
                                                  {'$set': {'user_pwd': user_pwd}})
