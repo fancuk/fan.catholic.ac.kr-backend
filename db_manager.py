@@ -111,43 +111,18 @@ class DBManager(object):
         return self.collection[json_request[0]].find()
           
     def delete_board(self, board_name, title, writer, date):
-        if board_name == 'freeBoard':
-            return self.collection.freeBoard.delete_one({'title': title, 'writer': writer, 'date': date})
-        elif board_name == 'noticeBoard':
-            return self.collection.noticeBoard.delete_one({'title': title, 'writer': writer, 'date': date})
-        elif board_name == 'studyBoard':
-            return self.collection.studyBoard.delete_one({'title': title, 'writer': writer, 'date': date})
+        return self.collection[board_name].delete_one({'title': title, 'writer': writer, 'date': date})
 
     def get_detail_board(self, board_name, title, writer, date):
-        if board_name == 'freeBoard':
-            return self.collection.freeBoard.find_one({'title': title, 'writer': writer, 'date': date})
-        elif board_name == 'noticeBoard':
-            return self.collection.noticeBoard.find_one({'title': title, 'writer': writer, 'date': date})
-        elif board_name == 'studyBoard':
-            return self.collection.studyBoard.find_one({'title': title, 'writer': writer, 'date': date})
+        return self.collection[board_name].find_one({'title': title, 'writer': writer, 'date': date})
 
     def edit_board(self, board_name, title, writer, date, edit_title, edit_content):
-        if board_name == 'freeBoard':
-            return self.collection.freeBoard.update_one({'title': title, 'writer': writer, 'date': date},
-                                                        {'$set':
-                                                             {
-                                                                 'title': edit_title,
-                                                                 'content': edit_content
-                                                             }})
-        elif board_name == 'noticeBoard':
-            return self.collection.noticeBoard.update_one({'title': title, 'writer': writer, 'date': date},
-                                                        {'$set':
-                                                             {
-                                                                 'title': edit_title,
-                                                                 'content': edit_content
-                                                             }})
-        elif board_name == 'studyBoard':
-            return self.collection.studyBoard.update_one({'title': title, 'writer': writer, 'date': date},
-                                                        {'$set':
-                                                             {
-                                                                 'title': edit_title,
-                                                                 'content': edit_content
-                                                             }})
+        return self.collection[board_name].update_one({'title': title, 'writer': writer, 'date': date},
+                                                    {'$set':
+                                                        {
+                                                            'title': edit_title,
+                                                            'content': edit_content
+                                                        }})
 
     def get_token(self, user_id):
         return self.collection.token.find_one({'user_id': user_id})
