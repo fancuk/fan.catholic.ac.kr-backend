@@ -260,7 +260,7 @@ def edit_user(*args):
 def add_board(*args):
     now = time.localtime()
     now_time = str(now.tm_year) + '-' + str(now.tm_mon) + '-' + str(now.tm_mday)
-    overlap = mongo.add_board(args, now_time)
+    overlap = mongo.add_post(args, now_time)
     if overlap is None:
         json_request = {'add': 'False'}
     else:
