@@ -108,12 +108,7 @@ class DBManager(object):
         return check
 
     def get_board(self, json_request):
-        if json_request[0] == 'freeBoard':
-            return self.collection.freeBoard.find()
-        elif json_request[0] == 'noticeBoard':
-            return self.collection.noticeBoard.find()
-        elif json_request[0] == 'studyBoard':
-            return self.collection.studyBoard.find()
+        return self.collection[json_request[0]].find()
           
     def delete_board(self, board_name, title, writer, date):
         if board_name == 'freeBoard':
