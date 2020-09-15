@@ -250,6 +250,17 @@ def edit_user(*args):
         return {'edit': 'False'}
 
 
+@app.route('/api/board/create', methods=['POST'])
+@validate_params(
+    Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def create_board(*parameter):
+    check = mongo.board_create(parameter)
+    if check is None:
+        return {'create': False}
+    return {'create': True}
+
+
 @app.route('/api/post/add', methods=['POST'])
 @validate_params(
     Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),

@@ -97,6 +97,15 @@ class DBManager(object):
                                                      }
                                                  })
 
+    def board_create(self, json_request):
+        check = None
+        if json_request[0] in self.collection.list_collection_names():
+            return check
+        else:
+            return self.collection[json_request[0]].insert_one({
+                'title': '', 'writer': '', 'content': '', 'date': ''
+            })
+
     def add_post(self, json_request, date):
         check = None
         if json_request[0] in self.collection.list_collection_names():
