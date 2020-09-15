@@ -70,7 +70,7 @@ def register(*args):
     return jsonify(json_request)
 
 
-@app.route('/api/reset/pwd', methods=['POST'])
+@app.route('/api/reset/pwd', methods=['PUT'])
 @validate_params(
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)  # 소문자와 숫자만 가능
 )
