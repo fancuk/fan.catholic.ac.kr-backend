@@ -278,8 +278,8 @@ def add_board(*args):
         json_request = {'add': 'True'}
 
     return jsonify(json_request)
-  
-  
+
+
 @app.route('/api/board/list', methods=['GET'])
 @validate_params(
     Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
