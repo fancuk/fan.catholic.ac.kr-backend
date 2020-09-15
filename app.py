@@ -250,7 +250,7 @@ def edit_user(*args):
         return {'edit': 'False'}
 
 
-@app.route('/api/board/add', methods=['POST'])
+@app.route('/api/post/add', methods=['POST'])
 @validate_params(
     Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),

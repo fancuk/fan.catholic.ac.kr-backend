@@ -33,7 +33,10 @@ class Authentication(object):
 
     def token_get(self, user_id):
         getter = self.mongo.get_token(user_id)
-        return getter['token']
+        if getter in None:
+            return False
+        else:
+            return getter['token']
 
     def token_expired(self, token):
         expired_time = datetime.datetime.now() - datetime.timedelta(days=2)
