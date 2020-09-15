@@ -33,7 +33,7 @@ class Authentication(object):
 
     def token_get(self, user_id):
         getter = self.mongo.get_token(user_id)
-        if getter in None:
+        if getter is None:
             return False
         else:
             return getter['token']
