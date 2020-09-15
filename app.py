@@ -102,10 +102,12 @@ def add_library(*args):
 
 
 @app.route('/api/library/list', methods=['GET'])
-def list_library():
-    page = request.args.get('page')
+@validate_params(
+    Param('page', GET, str, rules=[Pattern(r'\d')], required=True)
+)
+def list_library(*parameter):
+    page = parameter[0]
     check = mongo.get_library(int(page))
-
     if check is None:
         return {'list': 'False'}
 
