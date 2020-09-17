@@ -105,9 +105,10 @@ class DBManager(object):
         if json_request[0] in self.collection.list_collection_names():
             return check
         else:
-            return self.collection[json_request[0]].insert_one({
+            self.collection[json_request[0]].insert_one({
                 'title': '', 'writer': '', 'content': '', 'date': ''
             })
+            return self.collection[json_request[0]].delete_one({'title': ''})
 
     def add_post(self, json_request, date):
         check = None
