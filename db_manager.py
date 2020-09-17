@@ -27,13 +27,13 @@ class DBManager(object):
     def edit_user(self, request):
         return self.collection.member.update_one({'user_id': request[0]},
                                                  {'$set':
-                                                      {
-                                                       'name': request[1],
-                                                       'student_id': request[2],
-                                                       'grade': request[3],
-                                                       'semester': request[4],
-                                                       'level': request[5]
-                                                       }})
+                                                     {
+                                                         'name': request[1],
+                                                         'student_id': request[2],
+                                                         'grade': request[3],
+                                                         'semester': request[4],
+                                                         'level': request[5]
+                                                     }})
 
     def reset_pwd(self, request, user_pwd):
         return self.collection.member.update_one({'user_id': request},
@@ -47,22 +47,22 @@ class DBManager(object):
                                                    'count': request[2], 'renter': [], 'image': request[3]})
 
     def get_library(self, page):
-        return self.collection.library.find().limit(10).skip((page-1)*10)
+        return self.collection.library.find().limit(10).skip((page - 1) * 10)
 
-    def rent_library(self, title, renter, date, count):
-        return self.collection.library.update_one({'title': title},
-                                                  {'$push': {'renter': {'user_id': renter, 'date': date}},
+    def rent_library(self, request, date, count):
+        return self.collection.library.update_one({'title': request[0]},
+                                                  {'$push': {'renter': {'user_id': request[1], 'date': date}},
                                                    '$set': {'count': count - 1}})
 
-    def delete_library(self, title):
-        return self.collection.library.delete_one({'title': title})
+    def delete_library(self, request):
+        return self.collection.library.delete_one({'title': request[0]})
 
     def find_library(self, title):
         return self.collection.library.find_one({'title': title})
 
-    def return_library(self, title, renter, count):
-        return self.collection.library.update_one({'title': title},
-                                                  {'$pull': {'renter': {'user_id': renter}},
+    def return_library(self, request, count):
+        return self.collection.library.update_one({'title': request[0]},
+                                                  {'$pull': {'renter': {'user_id': request[1]}},
                                                    '$set': {'count': count + 1}})
 
     def edit_library(self, request):
@@ -74,8 +74,8 @@ class DBManager(object):
                                                         'image': request[4]
                                                         }})
 
-    def search_library(self, title):
-        return self.collection.library.find({'title': {"$regex": title, "$options": 'm'}})
+    def search_library(self, request):
+        return self.collection.library.find({'title': {"$regex": request[0], "$options": 'm'}})
 
     def edit_user_profile(self, request):
         return self.collection.member.update_one({'user_id': request[0]},
@@ -131,20 +131,20 @@ class DBManager(object):
 
     def get_posts(self, request):
         return self.collection[request[0]].find()
-          
-    def delete_post(self, board_name, title, writer, date):
-        return self.collection[board_name].delete_one({'title': title, 'writer': writer, 'date': date})
+      
+    def delete_post(self, request):
+        return self.collection[request[0]].delete_one({'title': request[1], 'writer': request[2], 'date': request[3]})
 
-    def get_detail_post(self, board_name, title, writer, date):
-        return self.collection[board_name].find_one({'title': title, 'writer': writer, 'date': date})
+    def get_detail_post(self, request):
+        return self.collection[request[0]].find_one({'title': request[1], 'writer': request[2], 'date': request[3]})
 
-    def edit_post(self, board_name, title, writer, date, edit_title, edit_content):
-        return self.collection[board_name].update_one({'title': title, 'writer': writer, 'date': date},
-                                                    {'$set':
-                                                        {
-                                                            'title': edit_title,
-                                                            'content': edit_content
-                                                        }})
+    def edit_post(self, request):
+        return self.collection[request[0]].update_one({'title': request[1], 'writer': request[2], 'date': request[3]},
+                                                      {'$set':
+                                                          {
+                                                              'title': request[4],
+                                                              'content': request[5]
+                                                          }})
 
     def get_token(self, user_id):
         return self.collection.token.find_one({'user_id': user_id})
