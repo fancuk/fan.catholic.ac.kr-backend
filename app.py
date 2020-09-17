@@ -309,6 +309,31 @@ def create_board(*parameter):
     return {'create': True}
 
 
+@app.route('/api/board/delete', methods=['DELETE'])
+@validate_params(
+    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def delete_board(*parameter):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.board_delete(parameter)
+    return {'delete': True}
+
+
+@app.route('/api/board/edit', methods=['PUT'])
+@validate_params(
+    Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('edit_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def edit_board(*parameter):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.board_edit(parameter)
+    return {'edit': True}
+
+
 @app.route('/api/post/add', methods=['POST'])
 @validate_params(
     Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
@@ -316,7 +341,7 @@ def create_board(*parameter):
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True)
 )
-def add_board(*args):
+def add_post(*args):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
@@ -331,16 +356,16 @@ def add_board(*args):
     return jsonify(json_request)
 
 
-@app.route('/api/board/list', methods=['GET'])
+@app.route('/api/post/list', methods=['GET'])
 @validate_params(
     Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
 )
-def list_board(*args):
+def list_post(*args):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
     board_name = request.args.get(args)
-    check = mongo.get_board(args)
+    check = mongo.get_posts(args)
 
     if check is None:
         return {'list': 'False'}
@@ -353,8 +378,8 @@ def list_board(*args):
     return jsonify(docs)
 
 
-@app.route('/api/board/delete', methods=['DELETE'])
-def delete_board():
+@app.route('/api/post/delete', methods=['DELETE'])
+def delete_post():
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
@@ -362,12 +387,12 @@ def delete_board():
     title = request.args.get('title')
     writer = request.args.get('writer')
     date = request.args.get('date')
-    check = mongo.delete_board(board_name, title, writer, date)
+    check = mongo.delete_post(board_name, title, writer, date)
     return {'delete': 'True'}
 
 
-@app.route('/api/board/detail', methods=['GET'])
-def detail_board():
+@app.route('/api/post/detail', methods=['GET'])
+def detail_post():
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
@@ -375,7 +400,7 @@ def detail_board():
     title = request.args.get('title')
     writer = request.args.get('writer')
     date = request.args.get('date')
-    check = mongo.get_detail_board(board_name, title, writer, date)
+    check = mongo.get_detail_post(board_name, title, writer, date)
 
     check.pop('_id')
 
@@ -385,8 +410,8 @@ def detail_board():
         return check
 
 
-@app.route('/api/board/edit', methods=['PUT'])
-def edit_board():
+@app.route('/api/post/edit', methods=['PUT'])
+def edit_post():
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
@@ -396,7 +421,7 @@ def edit_board():
     date = request.json['date']
     edit_title = request.json['edit_title']
     edit_content = request.json['edit_content']
-    check = mongo.edit_board(board_name, title, writer, date, edit_title, edit_content)
+    check = mongo.edit_post(board_name, title, writer, date, edit_title, edit_content)
     if check.modified_count != 0:
         return {'edit': 'True'}
     else:

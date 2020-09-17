@@ -113,6 +113,12 @@ class DBManager(object):
             })
             return self.collection[json_request[0]].delete_one({'title': ''})
 
+    def board_delete(self, json_request):
+        return self.collection[json_request[0]].drop()
+
+    def board_edit(self, request):
+        return self.collection[request[0]].rename(request[1])
+
     def add_post(self, json_request, date):
         check = None
         if json_request[0] in self.collection.list_collection_names():
@@ -123,16 +129,16 @@ class DBManager(object):
                 return check
         return check
 
-    def get_board(self, json_request):
+    def get_posts(self, json_request):
         return self.collection[json_request[0]].find()
           
-    def delete_board(self, board_name, title, writer, date):
+    def delete_post(self, board_name, title, writer, date):
         return self.collection[board_name].delete_one({'title': title, 'writer': writer, 'date': date})
 
-    def get_detail_board(self, board_name, title, writer, date):
+    def get_detail_post(self, board_name, title, writer, date):
         return self.collection[board_name].find_one({'title': title, 'writer': writer, 'date': date})
 
-    def edit_board(self, board_name, title, writer, date, edit_title, edit_content):
+    def edit_post(self, board_name, title, writer, date, edit_title, edit_content):
         return self.collection[board_name].update_one({'title': title, 'writer': writer, 'date': date},
                                                     {'$set':
                                                         {
