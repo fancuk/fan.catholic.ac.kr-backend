@@ -41,6 +41,17 @@ def login(*request_elements):
     return jsonify(json_request)
 
 
+@app.route('/api/check/id', methods=['GET'])
+@validate_params(
+    Param('user_id', GET, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
+)
+def check_id(*request_elements):
+    check = mongo.get_user_info(request_elements[0])
+    if check is None:
+        return {'id': 'True'}
+    return {'id': 'False'}
+
+
 @app.route('/api/logout', methods=['POST'])
 @validate_params(
     Param('token', JSON, str, rules=[Pattern(r'^.{1,50}$')], required=True)
