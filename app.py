@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
 from flask_cors import CORS
 from db_manager import DBManager
@@ -9,6 +9,7 @@ app = Flask(__name__)
 CORS(app)
 mongo = DBManager()
 auth = Authentication()
+token = None
 
 
 @app.route('/')
@@ -21,14 +22,17 @@ def hello_world():
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('user_pwd', JSON, str, required=True)
 )
-def login(*args):
-    user_id = args[0]
-    user_pwd = args[1]
+def login(*request_elements):
+    user_id = request_elements[0]
+    user_pwd = request_elements[1]
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
             auth.token_recreation(user_id)
             json_request = {'login': 'True', 'user_id': user_id, 'token': auth.token_get(user_id)}
+            resp = make_response(json_request)
+            resp.headers['Authorization'] = auth.token_get(user_id)
+            return resp
         else:
             json_request = {'login': 'False'}
     else:
@@ -41,8 +45,8 @@ def login(*args):
 @validate_params(
     Param('token', JSON, str, rules=[Pattern(r'^.{1,50}$')], required=True)
 )
-def logout(*args):
-    if auth.token_expired(args[0]).modified_count == 1:
+def logout(*request_elements):
+    if auth.token_expired(request_elements[0]).modified_count == 1:
         return {'logout': 'True'}
     else:
         return {'logout': 'False'}
@@ -59,10 +63,10 @@ def logout(*args):
     Param('phone', JSON, str, rules=[Pattern(r'\d{2,3}-\d{3,4}-\d{4}')], required=True),
     Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True)
 )
-def register(*args):
-    check = mongo.add_user_info(args)
+def register(*request_elements):
+    check = mongo.add_user_info(request_elements)
     if check is not None:
-        auth.token_creation(args[0])
+        auth.token_creation(request_elements[0])
         json_request = {'register': 'True'}
     else:
         json_request = {'register': 'False'}
@@ -74,9 +78,12 @@ def register(*args):
 @validate_params(
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)  # 소문자와 숫자만 가능
 )
-def reset_pwd(*args):
+def reset_pwd(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
     user_pwd = 'fancuk'
-    check = mongo.reset_pwd(args[0], user_pwd)
+    check = mongo.reset_pwd(request_elements[0], user_pwd)
     return {'reset': 'True'}
 
 
@@ -87,10 +94,13 @@ def reset_pwd(*args):
     Param('count', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('image', JSON, str, rules=[Pattern(r'^.{5,100000}$')], required=True)
 )
-def add_library(*args):
-    overlap = mongo.find_library(args[0])
+def add_library(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    overlap = mongo.find_library(request_elements[0])
     if overlap is None:
-        check = mongo.add_library(args)
+        check = mongo.add_library(request_elements)
         if check is not None:
             json_request = {'add': 'True'}
         else:
@@ -101,12 +111,15 @@ def add_library(*args):
         return jsonify(json_request={'error_code': 409, 'error_msg': '책 중복'})
 
 
-@app.route('/api/library/list', methods=['GET'])
+@app.route('/api/library/list', methods=['GET', 'POST'])
 @validate_params(
     Param('page', GET, str, rules=[Pattern(r'\d')], required=True)
 )
-def list_library(*parameter):
-    page = parameter[0]
+def list_library(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    page = request_elements[0]
     check = mongo.get_library(int(page))
     if check is None:
         return {'list': 'False'}
@@ -115,13 +128,23 @@ def list_library(*parameter):
     for doc in check:
         doc.pop('_id')  # 개소름
         docs.append(doc)
+
+    page = int(mongo.count_elements('library') / 10) + 1
+    docs.append({'page': page})
     return jsonify(docs)
 
 
 @app.route('/api/library/rent', methods=['POST'])
-def rent_library():
-    title = request.json['title']
-    renter = request.json['renter']
+@validate_params(
+    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('renter', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)
+)
+def rent_library(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    title = request_elements[0]
+    renter = request_elements[1]
     find_library = mongo.find_library(title)
     count = int(find_library['count'])
     if count <= 0:
@@ -129,7 +152,7 @@ def rent_library():
     else:
         now = time.localtime()
         now_time = str(now.tm_year) + '-' + str(now.tm_mon) + '-' + str(now.tm_mday)
-        check = mongo.rent_library(title, renter, now_time, count)
+        check = mongo.rent_library(request_elements, now_time, count)
         if check is not None:
             json_request = {'rent': 'True'}
         else:
@@ -139,19 +162,31 @@ def rent_library():
 
 
 @app.route('/api/library/delete', methods=['DELETE'])
-def delete_library():
-    title = request.args.get('title')
-    check = mongo.delete_library(title)
+@validate_params(
+    Param('title', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def delete_library(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.delete_library(request_elements)
     return {'delete': 'True'}
 
 
 @app.route('/api/library/return', methods=['PUT'])
-def return_library():
-    title = request.json['title']
-    renter = request.json['renter']
+@validate_params(
+    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('renter', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)
+)
+def return_library(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    title = request_elements[0]
+    renter = request_elements[1]
     find_library = mongo.find_library(title)
     count = int(find_library['count'])
-    check = mongo.return_library(title, renter, count)
+    check = mongo.return_library(request_elements, count)
     if check is not None:
         json_request = {'return': 'True'}
     else:
@@ -167,12 +202,31 @@ def return_library():
     Param('edit_count', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('edit_image', JSON, str, rules=[Pattern(r'^.{5,100000}$')], required=True)
 )
-def edit_library(*args):
-    check = mongo.edit_library(args)
+def edit_library(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.edit_library(request_elements)
     if check is not None:
         return {'edit': 'True'}
     else:
         return {'edit': 'False'}
+
+
+@app.route('/api/library/search', methods=['GET'])
+@validate_params(
+    Param('title', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def search_library(*request_elements):
+    check = mongo.search_library(request_elements)
+    if check is None:
+        return {'list': 'False'}
+
+    docs = []
+    for doc in check:  # 개소름
+        doc.pop('_id')
+        docs.append(doc)
+    return jsonify(docs)
 
 
 @app.route('/api/profile/edit', methods=['PUT'])
@@ -186,8 +240,11 @@ def edit_library(*args):
     Param('phone', JSON, str, rules=[Pattern(r'\d{2,3}-\d{3,4}-\d{4}')], required=True),
     Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True)
 )
-def edit_profile(*args):
-    check = mongo.edit_user_profile(args)
+def edit_profile(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.edit_user_profile(request_elements)
     if check is not None:
         return {'edit': 'True'}
     else:
@@ -195,9 +252,14 @@ def edit_profile(*args):
 
 
 @app.route('/api/user/library', methods=['GET'])
-def my_library():
-    user_id = request.args.get('user_id')
-    check = mongo.get_user_library(user_id)
+@validate_params(
+    Param('user_id', GET, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)
+)
+def my_library(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.get_user_library(request_elements[0])
 
     docs = []
     for doc in check:
@@ -208,12 +270,15 @@ def my_library():
 
 @app.route('/api/delete/user', methods=['DELETE'])
 @validate_params(
-    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
-    Param('user_pwd', JSON, str, required=True)
+    Param('user_id', GET, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
+    Param('user_pwd', GET, str, required=True)
 )
-def delete_user(*args):
-    user_id = request.args.get(args[0])
-    user_pwd = request.args.get(args[1])
+def delete_user(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    user_id = request_elements[0]
+    user_pwd = request_elements[1]
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
@@ -224,6 +289,9 @@ def delete_user(*args):
 
 @app.route('/api/user/list', methods=['GET'])
 def user_list():
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
     check = mongo.get_user_list()
     docs = []
     for doc in check:
@@ -244,8 +312,11 @@ def user_list():
     Param('semester', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('level', JSON, str, rules=[Pattern(r'\d')], required=True)
 )
-def edit_user(*args):
-    check = mongo.edit_user(args)
+def edit_user(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.edit_user(request_elements)
     if check.modified_count != 0:
         return {'edit': 'True'}
     else:
@@ -256,11 +327,39 @@ def edit_user(*args):
 @validate_params(
     Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True)
 )
-def create_board(*parameter):
-    check = mongo.board_create(parameter)
+def create_board(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.board_create(request_elements)
     if check is None:
         return {'create': False}
     return {'create': True}
+
+
+@app.route('/api/board/delete', methods=['DELETE'])
+@validate_params(
+    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def delete_board(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.board_delete(request_elements)
+    return {'delete': True}
+
+
+@app.route('/api/board/edit', methods=['PUT'])
+@validate_params(
+    Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('edit_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+)
+def edit_board(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.board_edit(request_elements)
+    return {'edit': True}
 
 
 @app.route('/api/post/add', methods=['POST'])
@@ -270,10 +369,13 @@ def create_board(*parameter):
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True)
 )
-def add_board(*args):
+def add_post(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
     now = time.localtime()
     now_time = str(now.tm_year) + '-' + str(now.tm_mon) + '-' + str(now.tm_mday)
-    overlap = mongo.add_post(args, now_time)
+    overlap = mongo.add_post(request_elements, now_time)
     if overlap is None:
         json_request = {'add': 'False'}
     else:
@@ -282,13 +384,15 @@ def add_board(*args):
     return jsonify(json_request)
 
 
-@app.route('/api/board/list', methods=['GET'])
+@app.route('/api/post/list', methods=['GET'])
 @validate_params(
     Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
 )
-def list_board(*args):
-    board_name = request.args.get(args)
-    check = mongo.get_board(args)
+def list_post(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.get_posts(request_elements)
 
     if check is None:
         return {'list': 'False'}
@@ -297,26 +401,39 @@ def list_board(*args):
     for doc in check:  # 개소름
         doc.pop('_id')
         docs.append(doc)
+
     return jsonify(docs)
 
 
-@app.route('/api/board/delete', methods=['DELETE'])
-def delete_board():
-    board_name = request.args.get('board_name')
-    title = request.args.get('title')
-    writer = request.args.get('writer')
-    date = request.args.get('date')
-    check = mongo.delete_board(board_name, title, writer, date)
+@app.route('/api/post/delete', methods=['DELETE'])
+@validate_params(
+    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('title', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('writer', GET, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('date', GET, str, rules=[Pattern(r'^.{2,30}$')], required=True)
+)
+def delete_post(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+
+    check = mongo.delete_post(request_elements)
     return {'delete': 'True'}
 
 
-@app.route('/api/board/detail', methods=['GET'])
-def detail_board():
-    board_name = request.args.get('board_name')
-    title = request.args.get('title')
-    writer = request.args.get('writer')
-    date = request.args.get('date')
-    check = mongo.get_detail_board(board_name, title, writer, date)
+@app.route('/api/post/detail', methods=['GET'])
+@validate_params(
+    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('title', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('writer', GET, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('date', GET, str, rules=[Pattern(r'^.{2,30}$')], required=True)
+)
+def detail_post(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+
+    check = mongo.get_detail_post(request_elements)
 
     check.pop('_id')
 
@@ -326,33 +443,25 @@ def detail_board():
         return check
 
 
-@app.route('/api/board/edit', methods=['PUT'])
-def edit_board():
-    board_name = request.json['board_name']
-    title = request.json['title']
-    writer = request.json['writer']
-    date = request.json['date']
-    edit_title = request.json['edit_title']
-    edit_content = request.json['edit_content']
-    check = mongo.edit_board(board_name, title, writer, date, edit_title, edit_content)
+@app.route('/api/post/edit', methods=['PUT'])
+@validate_params(
+    Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('date', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('edit_title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('edit_content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+)
+def edit_post(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    check = mongo.edit_post(request_elements)
     if check.modified_count != 0:
         return {'edit': 'True'}
     else:
         return {'edit': 'False'}
 
-
-@app.route('/api/library/search', methods=['GET'])
-def search_library():
-    title = request.args.get('title')
-    check = mongo.search_library(title)
-    if check is None:
-        return {'list': 'False'}
-
-    docs = []
-    for doc in check:  # 개소름
-        doc.pop('_id')
-        docs.append(doc)
-    return jsonify(docs)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
