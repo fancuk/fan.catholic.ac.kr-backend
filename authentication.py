@@ -26,10 +26,11 @@ class Authentication(object):
 
     def token_recreation(self, user_id):
         now = datetime.datetime.now()
-        return self.mongo.update_token(user_id, secrets.token_urlsafe(), now)
+        return self.mongo.recreate_token(user_id, secrets.token_urlsafe(), now)
 
     def token_update(self, token):
-        return self.mongo.update_token()
+        now = datetime.datetime.now()
+        return self.mongo.update_token(token, now)
 
     def token_get(self, user_id):
         getter = self.mongo.get_token(user_id)
