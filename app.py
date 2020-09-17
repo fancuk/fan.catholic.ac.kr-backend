@@ -22,9 +22,9 @@ def hello_world():
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('user_pwd', JSON, str, required=True)
 )
-def login(*args):
-    user_id = args[0]
-    user_pwd = args[1]
+def login(*request_elements):
+    user_id = request_elements[0]
+    user_pwd = request_elements[1]
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
@@ -45,8 +45,8 @@ def login(*args):
 @validate_params(
     Param('token', JSON, str, rules=[Pattern(r'^.{1,50}$')], required=True)
 )
-def logout(*args):
-    if auth.token_expired(args[0]).modified_count == 1:
+def logout(*request_elements):
+    if auth.token_expired(request_elements[0]).modified_count == 1:
         return {'logout': 'True'}
     else:
         return {'logout': 'False'}
@@ -63,10 +63,10 @@ def logout(*args):
     Param('phone', JSON, str, rules=[Pattern(r'\d{2,3}-\d{3,4}-\d{4}')], required=True),
     Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True)
 )
-def register(*args):
-    check = mongo.add_user_info(args)
+def register(*request_elements):
+    check = mongo.add_user_info(request_elements)
     if check is not None:
-        auth.token_creation(args[0])
+        auth.token_creation(request_elements[0])
         json_request = {'register': 'True'}
     else:
         json_request = {'register': 'False'}
@@ -78,12 +78,12 @@ def register(*args):
 @validate_params(
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)  # 소문자와 숫자만 가능
 )
-def reset_pwd(*args):
+def reset_pwd(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
     user_pwd = 'fancuk'
-    check = mongo.reset_pwd(args[0], user_pwd)
+    check = mongo.reset_pwd(request_elements[0], user_pwd)
     return {'reset': 'True'}
 
 
@@ -94,13 +94,13 @@ def reset_pwd(*args):
     Param('count', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('image', JSON, str, rules=[Pattern(r'^.{5,100000}$')], required=True)
 )
-def add_library(*args):
+def add_library(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
-    overlap = mongo.find_library(args[0])
+    overlap = mongo.find_library(request_elements[0])
     if overlap is None:
-        check = mongo.add_library(args)
+        check = mongo.add_library(request_elements)
         if check is not None:
             json_request = {'add': 'True'}
         else:
@@ -115,11 +115,11 @@ def add_library(*args):
 @validate_params(
     Param('page', GET, str, rules=[Pattern(r'\d')], required=True)
 )
-def list_library(*parameter):
+def list_library(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
-    page = parameter[0]
+    page = request_elements[0]
     check = mongo.get_library(int(page))
     if check is None:
         return {'list': 'False'}
@@ -192,11 +192,11 @@ def return_library():
     Param('edit_count', JSON, str, rules=[Pattern(r'\d')], required=True),
     Param('edit_image', JSON, str, rules=[Pattern(r'^.{5,100000}$')], required=True)
 )
-def edit_library(*args):
+def edit_library(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
-    check = mongo.edit_library(args)
+    check = mongo.edit_library(request_elements)
     if check is not None:
         return {'edit': 'True'}
     else:
@@ -214,11 +214,11 @@ def edit_library(*args):
     Param('phone', JSON, str, rules=[Pattern(r'\d{2,3}-\d{3,4}-\d{4}')], required=True),
     Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True)
 )
-def edit_profile(*args):
+def edit_profile(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
-    check = mongo.edit_user_profile(args)
+    check = mongo.edit_user_profile(request_elements)
     if check is not None:
         return {'edit': 'True'}
     else:
@@ -245,12 +245,12 @@ def my_library():
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('user_pwd', JSON, str, required=True)
 )
-def delete_user(*args):
+def delete_user(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
-    user_id = request.args.get(args[0])
-    user_pwd = request.args.get(args[1])
+    user_id = request_elements[0]
+    user_pwd = request_elements[1]
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
@@ -341,13 +341,13 @@ def edit_board(*parameter):
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True)
 )
-def add_post(*args):
+def add_post(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
     now = time.localtime()
     now_time = str(now.tm_year) + '-' + str(now.tm_mon) + '-' + str(now.tm_mday)
-    overlap = mongo.add_post(args, now_time)
+    overlap = mongo.add_post(request_elements, now_time)
     if overlap is None:
         json_request = {'add': 'False'}
     else:
@@ -360,12 +360,11 @@ def add_post(*args):
 @validate_params(
     Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
 )
-def list_post(*args):
+def list_post(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
-    board_name = request.args.get(args)
-    check = mongo.get_posts(args)
+    check = mongo.get_posts(request_elements[0])
 
     if check is None:
         return {'list': 'False'}
