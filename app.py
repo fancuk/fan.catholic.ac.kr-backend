@@ -128,6 +128,9 @@ def list_library(*parameter):
     for doc in check:
         doc.pop('_id')  # 개소름
         docs.append(doc)
+
+    page = int(mongo.count_elements('library') / 10) + 1
+    docs.append({'page': page})
     return jsonify(docs)
 
 
@@ -346,6 +349,7 @@ def list_board(*args):
     for doc in check:  # 개소름
         doc.pop('_id')
         docs.append(doc)
+
     return jsonify(docs)
 
 

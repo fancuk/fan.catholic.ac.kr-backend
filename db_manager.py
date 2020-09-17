@@ -39,6 +39,9 @@ class DBManager(object):
         return self.collection.member.update_one({'user_id': json_request},
                                                  {'$set': {'user_pwd': user_pwd}})
 
+    def count_elements(self, collection):
+        return self.collection[collection].count()
+
     def add_library(self, json_request):
         return self.collection.library.insert_one({'title': json_request[0], 'writer': json_request[1],
                                                    'count': json_request[2], 'renter': [], 'image': json_request[3]})
