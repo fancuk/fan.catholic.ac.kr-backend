@@ -341,5 +341,18 @@ def edit_board():
         return {'edit': 'False'}
 
 
+@app.route('/api/library/search', methods=['GET'])
+def search_library():
+    title = request.args.get('title')
+    check = mongo.search_library(title)
+    if check is None:
+        return {'list': 'False'}
+
+    docs = []
+    for doc in check:  # 개소름
+        doc.pop('_id')
+        docs.append(doc)
+    return jsonify(docs)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

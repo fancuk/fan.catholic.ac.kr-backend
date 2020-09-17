@@ -71,6 +71,9 @@ class DBManager(object):
                                                         'image': json_request[4]
                                                         }})
 
+    def search_library(self, title):
+        return self.collection.library.find({'title': {"$regex": title, "$options": 'm'}})
+
     def edit_user_profile(self, json_request):
         return self.collection.member.update_one({'user_id': json_request[0]},
                                                  {'$set':
