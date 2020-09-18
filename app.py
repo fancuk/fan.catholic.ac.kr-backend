@@ -279,7 +279,7 @@ def my_library(*request_elements):
     return jsonify(docs)
 
 
-@app.route('/api/delete/user', methods=['DELETE'])
+@app.route('/api/delete/user', methods=['POST'])
 @validate_params(
     Param('user_id', GET, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('user_pwd', GET, str, required=True)
