@@ -139,10 +139,9 @@ def list_library(*request_elements):
     for doc in check:
         doc.pop('_id')  # 개소름
         docs.append(doc)
-
     page = int(mongo.count_elements('library') / 10) + 1
-    docs.append({'page': page})
-    return jsonify(docs)
+    book_list = {'books': docs}, {'page': page}
+    return jsonify(book_list)
 
 
 @app.route('/api/library/rent', methods=['POST'])
