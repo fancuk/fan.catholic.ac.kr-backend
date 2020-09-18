@@ -29,7 +29,7 @@ def login(*request_elements):
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
             auth.token_recreation(user_id)
-            json_request = {'login': 'True', 'user_id': user_id, 'token': auth.token_get(user_id)}
+            json_request = {'login': 'True', 'user_id': user_id}
             resp = make_response(json_request)
             resp.headers['Authorization'] = auth.token_get(user_id)
             return resp
@@ -52,9 +52,9 @@ def check_id(*request_elements):
     return {'id': 'False'}
 
 
-@app.route('/api/logout', methods=['POST'])
+@app.route('/api/logout', methods=['GET'])
 @validate_params(
-    Param('token', JSON, str, rules=[Pattern(r'^.{1,50}$')], required=True)
+    Param('user_id', GET, str, rules=[Pattern(r'^.{1,50}$')], required=True)
 )
 def logout(*request_elements):
     if auth.token_expired(request_elements[0]).modified_count == 1:

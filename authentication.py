@@ -39,9 +39,9 @@ class Authentication(object):
         else:
             return getter['token']
 
-    def token_expired(self, token):
+    def token_expired(self, user_id):
         expired_time = datetime.datetime.now() - datetime.timedelta(days=2)
-        return self.mongo.expired_token(token, expired_time)
+        return self.mongo.expired_token(user_id, expired_time)
 
     def __del__(self):
         pass
