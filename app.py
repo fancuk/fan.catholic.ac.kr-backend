@@ -242,6 +242,33 @@ def search_library(*request_elements):
     return jsonify(docs)
 
 
+@app.route('/api/library/rent_list', methods=['GET', 'POST'])
+@validate_params(
+    Param('page', GET, str, rules=[Pattern(r'\d')], required=True)
+)
+def rent_list_library(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        auth.token_update(token)
+    page = request_elements[0]
+    check = mongo.get_library(int(page))
+    if check is None:
+        return {'list': 'False'}
+
+    docs = []
+    for doc in check:
+        doc.pop('_id')  # 개소름
+        if int(len(doc['renter'])) is not 0:
+            docs.append(doc)
+
+    if int(len(docs) % 10) is 0:
+        page = int(len(docs) / 10)
+    else:
+        page = int(len(docs) / 10) + 1
+    book_list = {'books': docs}, {'page': page}
+    return jsonify(book_list)
+
+
 @app.route('/api/profile/edit', methods=['PUT'])
 @validate_params(
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
