@@ -95,8 +95,7 @@ def reset_pwd(*request_elements):
         check = auth.token_update(token).modified_count
         if check != 0:
             user_pwd = 'fancuk'
-            check = mongo.reset_pwd(request_elements[0], user_pwd).modified_count
-            print(check)
+            check = mongo.reset_pwd(request_elements[0], user_pwd)
             return {'reset': True}
     return {'token': False}
 
@@ -127,7 +126,7 @@ def add_library(*request_elements):
     return {'token': False}
 
 
-@app.route('/api/library/list', methods=['GET', 'POST'])
+@app.route('/api/library/list', methods=['GET'])
 @validate_params(
     Param('page', GET, str, rules=[Pattern(r'\d')], required=True)
 )
@@ -254,7 +253,7 @@ def search_library(*request_elements):
     return jsonify(docs)
 
 
-@app.route('/api/library/rent_list', methods=['GET', 'POST'])
+@app.route('/api/library/rent_list', methods=['GET'])
 @validate_params(
     Param('page', GET, str, rules=[Pattern(r'\d')], required=True)
 )
