@@ -139,7 +139,10 @@ def list_library(*request_elements):
     for doc in check:
         doc.pop('_id')  # 개소름
         docs.append(doc)
-    page = int(mongo.count_elements('library') / 10) + 1
+    if int(mongo.count_elements('library') % 10) is 0:
+        page = int(mongo.count_elements('library') / 10)
+    else:
+        page = int(mongo.count_elements('library') / 10) + 1
     book_list = {'books': docs}, {'page': page}
     return jsonify(book_list)
 
