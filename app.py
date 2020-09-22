@@ -241,7 +241,7 @@ def search_library(*request_elements):
 
 @app.route('/api/profile/edit', methods=['PUT'])
 @validate_params(
-    Param('id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
+    Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('user_pwd', JSON, str, required=True),
     Param('name', JSON, str, rules=[Pattern(r'^[가-힣]*$')], required=True),
     Param('student_id', JSON, str, rules=[Pattern(r'^[0-9]+$')], required=True),
