@@ -60,9 +60,9 @@ class DBManager(object):
     def find_library(self, title):
         return self.collection.library.find_one({'title': title})
 
-    def return_library(self, request, count):
-        return self.collection.library.update_one({'title': request[0]},
-                                                  {'$pull': {'renter': {'user_id': request[1]}},
+    def return_library(self, title, renter, count):
+        return self.collection.library.update_one({'title': title},
+                                                  {'$pull': {'renter': {'user_id': renter}},
                                                    '$set': {'count': count + 1}})
 
     def edit_library(self, request):

@@ -194,8 +194,7 @@ def delete_library(*request_elements):
 
 @app.route('/api/library/return', methods=['PUT'])
 @validate_params(
-    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
-    Param('renter', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)
+    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True)
 )
 def return_library(*request_elements):
     token = request.headers.get('Authorization')
@@ -203,15 +202,14 @@ def return_library(*request_elements):
         check = auth.token_update(token).modified_count
         if check != 0:
             title = request_elements[0]
-            renter = request_elements[1]
+            renter = auth.id_get(token)
             find_library = mongo.find_library(title)
-            count = int(find_library['count'])
-            check = mongo.return_library(request_elements, count)
-            if check is not None:
-                json_request = {'return': True}
-            else:
-                json_request = {'return': False}
-            return jsonify(json_request)
+            if find_library is not None:
+                count = int(find_library['count'])
+                check = mongo.return_library(title, renter, count)
+                if check is not None:
+                    return {'return': True}
+            return {'return': False}
     return {'token': False}
 
 
