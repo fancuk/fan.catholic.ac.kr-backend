@@ -9,6 +9,9 @@ class Authentication(object):
         self.mongo = DBManager()
         pass
 
+    def id_get(self, token):
+        return self.mongo.get_user_id(token)['user_id']
+
     def token_creation(self, user_id):
         now = datetime.datetime.now()
         return self.mongo.set_token(user_id, secrets.token_urlsafe(), now)

@@ -153,8 +153,7 @@ def list_library(*request_elements):
 
 @app.route('/api/library/rent', methods=['POST'])
 @validate_params(
-    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
-    Param('renter', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)
+    Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True)
 )
 def rent_library(*request_elements):
     token = request.headers.get('Authorization')
@@ -162,7 +161,7 @@ def rent_library(*request_elements):
         check = auth.token_update(token).modified_count
         if check != 0:
             title = request_elements[0]
-            renter = request_elements[1]
+            renter = auth.id_get(token)
             find_library = mongo.find_library(title)
             count = int(find_library['count'])
             if count <= 0:
@@ -170,7 +169,7 @@ def rent_library(*request_elements):
             else:
                 now = time.localtime()
                 now_time = str(now.tm_year) + '-' + str(now.tm_mon) + '-' + str(now.tm_mday)
-                check = mongo.rent_library(request_elements, now_time, count)
+                check = mongo.rent_library(title, renter, now_time, count)
                 if check is not None:
                     json_request = {'rent': True}
                 else:

@@ -49,9 +49,9 @@ class DBManager(object):
     def get_library(self, page):
         return self.collection.library.find().limit(10).skip((page - 1) * 10)
 
-    def rent_library(self, request, date, count):
-        return self.collection.library.update_one({'title': request[0]},
-                                                  {'$push': {'renter': {'user_id': request[1], 'date': date}},
+    def rent_library(self, title, renter, date, count):
+        return self.collection.library.update_one({'title': title},
+                                                  {'$push': {'renter': {'user_id': renter, 'date': date}},
                                                    '$set': {'count': count - 1}})
 
     def delete_library(self, request):
@@ -163,6 +163,9 @@ class DBManager(object):
 
     def expired_token(self, user_id, expired_time):
         return self.collection.token.update_one({'user_id': user_id}, {'$set': {'time': expired_time}})
+
+    def get_user_id(self, token):
+        return self.collection.token.find_one({'token': token})
 
     def __del__(self):
         pass
