@@ -335,7 +335,7 @@ def my_library(*request_elements):
     return {'token': False}
 
 
-@app.route('/api/delete/user', methods=['POST'])
+@app.route('/api/profile/drop', methods=['POST'])
 @validate_params(
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('user_pwd', JSON, str, required=True)
@@ -352,6 +352,24 @@ def delete_user(*request_elements):
                 if user_pwd == user_info['user_pwd']:
                     check = mongo.delete_user(user_id)
                     return {'delete': True}
+            return {'delete': False}
+    return {'token': False}
+
+
+@app.route('/api/user/delete', methods=['DELETE'])
+@validate_params(
+    Param('user_id', GET, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)  # 소문자와 숫자만 가능
+)
+def delete_user(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        check = auth.token_update(token).modified_count
+        if check != 0:
+            user_id = request_elements[0]
+            user_info = mongo.get_user_info(user_id)
+            if user_info is not None:
+                check = mongo.delete_user(user_id)
+                return {'delete': True}
             return {'delete': False}
     return {'token': False}
 
