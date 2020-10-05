@@ -301,6 +301,21 @@ def edit_profile(*request_elements):
     return {'token': False}
 
 
+@app.route('/api/profile/info', methods=['GET'])
+@validate_params(
+    Param('user_id', GET, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
+)
+def info_profile(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        check = mongo.get_user_info(request_elements[0])
+        if check is not None:
+            check.pop('_id')
+            check.pop('user_pwd')
+            return check
+    return {'info': False}
+
+
 @app.route('/api/user/library', methods=['GET'])
 @validate_params(
     Param('user_id', GET, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True)
@@ -431,7 +446,7 @@ def edit_board(*request_elements):
     Param('board_name', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
-    Param('content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True)
+    Param('content', JSON, str, rules=[Pattern(r'^.{2,10000}$')], required=True)
 )
 def add_post(*request_elements):
     token = request.headers.get('Authorization')
