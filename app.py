@@ -340,7 +340,7 @@ def my_library(*request_elements):
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
     Param('user_pwd', JSON, str, required=True)
 )
-def delete_user(*request_elements):
+def drop_user(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         check = auth.token_update(token).modified_count
