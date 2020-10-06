@@ -46,5 +46,8 @@ class Authentication(object):
         expired_time = datetime.datetime.now() - datetime.timedelta(days=2)
         return self.mongo.expired_token(user_id, expired_time)
 
+    def token_delete(self, user_id):
+        return self.mongo.delete_token(user_id)
+
     def __del__(self):
         pass

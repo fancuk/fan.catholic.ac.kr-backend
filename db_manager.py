@@ -164,6 +164,9 @@ class DBManager(object):
     def expired_token(self, user_id, expired_time):
         return self.collection.token.update_one({'user_id': user_id}, {'$set': {'time': expired_time}})
 
+    def delete_token(self, user_id):
+        return self.collection.token.delete_one({'user_id': user_id})
+
     def get_user_id(self, token):
         return self.collection.token.find_one({'token': token})
 

@@ -358,7 +358,8 @@ def drop_user(*request_elements):
                 user_info = mongo.get_user_info(user_id)
                 if user_info is not None:
                     if user_pwd == user_info['user_pwd']:
-                        check = mongo.delete_user(user_id)
+                        auth.token_delete(user_id)
+                        mongo.delete_user(user_id)
                         return {'delete': True}
                 return {'delete': False}
     return {'token': False}
@@ -377,6 +378,7 @@ def delete_user(*request_elements):
                 user_id = request_elements[0]
                 user_info = mongo.get_user_info(user_id)
                 if user_info is not None:
+                    auth.token_delete(user_id)
                     mongo.delete_user(user_id)
                     return {'delete': True}
                 return {'delete': False}
