@@ -297,11 +297,12 @@ def edit_profile(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.edit_user_profile(request_elements)
-            if check is not None:
-                return {'edit': True}
-            else:
-                return {'edit': False}
+            if auth.id_get(token) == request_elements[0]:
+                check = mongo.edit_user_profile(request_elements)
+                if check is not None:
+                    return {'edit': True}
+                else:
+                    return {'edit': False}
     return {'token': False}
 
 
@@ -312,11 +313,12 @@ def edit_profile(*request_elements):
 def info_profile(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
-        check = mongo.get_user_info(request_elements[0])
-        if check is not None:
-            check.pop('_id')
-            check.pop('user_pwd')
-            return check
+        if auth.id_get(token) == request_elements[0]:
+            check = mongo.get_user_info(request_elements[0])
+            if check is not None:
+                check.pop('_id')
+                check.pop('user_pwd')
+                return check
     return {'info': False}
 
 
@@ -329,13 +331,14 @@ def my_library(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.get_user_library(request_elements[0])
+            if auth.id_get(token) == request_elements[0]:
+                check = mongo.get_user_library(request_elements[0])
 
-            docs = []
-            for doc in check:
-                doc.pop('_id')  # 개소름
-                docs.append(doc)
-            return jsonify(docs)
+                docs = []
+                for doc in check:
+                    doc.pop('_id')  # 개소름
+                    docs.append(doc)
+                return jsonify(docs)
     return {'token': False}
 
 
@@ -349,14 +352,15 @@ def drop_user(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            user_id = request_elements[0]
-            user_pwd = request_elements[1]
-            user_info = mongo.get_user_info(user_id)
-            if user_info is not None:
-                if user_pwd == user_info['user_pwd']:
-                    check = mongo.delete_user(user_id)
-                    return {'delete': True}
-            return {'delete': False}
+            if auth.id_get(token) == request_elements[0]:
+                user_id = request_elements[0]
+                user_pwd = request_elements[1]
+                user_info = mongo.get_user_info(user_id)
+                if user_info is not None:
+                    if user_pwd == user_info['user_pwd']:
+                        check = mongo.delete_user(user_id)
+                        return {'delete': True}
+                return {'delete': False}
     return {'token': False}
 
 
@@ -527,8 +531,9 @@ def delete_post(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.delete_post(request_elements)
-            return {'delete': True}
+            if auth.id_get(token) == request_elements[3]:
+                mongo.delete_post(request_elements)
+                return {'delete': True}
     return {'token': False}
 
 
@@ -569,11 +574,12 @@ def edit_post(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.edit_post(request_elements)
-            if check.modified_count != 0:
-                return {'edit': True}
-            else:
-                return {'edit': False}
+            if auth.id_get(token) == request_elements[3]:
+                check = mongo.edit_post(request_elements)
+                if check.modified_count != 0:
+                    return {'edit': True}
+                else:
+                    return {'edit': False}
     return {'token': False}
 
 
