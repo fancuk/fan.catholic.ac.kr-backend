@@ -92,11 +92,12 @@ def register(*request_elements):
 def reset_pwd(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
-        check = auth.token_update(token).modified_count
-        if check != 0:
-            user_pwd = 'fancuk'
-            check = mongo.reset_pwd(request_elements[0], user_pwd)
-            return {'reset': True}
+            check = auth.token_update(token).modified_count
+            if check != 0:
+                if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                    user_pwd = 'fancuk'
+                    mongo.reset_pwd(request_elements[0], user_pwd)
+                    return {'reset': True}
     return {'token': False}
 
 
@@ -112,17 +113,18 @@ def add_library(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            overlap = mongo.find_library(request_elements[0])
-            if overlap is None:
-                check = mongo.add_library(request_elements)
-                if check is not None:
-                    json_request = {'add': True}
-                else:
-                    json_request = {'add': False}
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                overlap = mongo.find_library(request_elements[0])
+                if overlap is None:
+                    check = mongo.add_library(request_elements)
+                    if check is not None:
+                        json_request = {'add': True}
+                    else:
+                        json_request = {'add': False}
 
-                return jsonify(json_request)
-            else:
-                return jsonify(json_request={'error_code': 409, 'error_msg': '책 중복'})
+                    return jsonify(json_request)
+                else:
+                    return jsonify(json_request={'error_code': 409, 'error_msg': '책 중복'})
     return {'token': False}
 
 
@@ -187,8 +189,9 @@ def delete_library(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.delete_library(request_elements)
-            return {'delete': True}
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                mongo.delete_library(request_elements)
+                return {'delete': True}
     return {'token': False}
 
 
@@ -226,11 +229,12 @@ def edit_library(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.edit_library(request_elements)
-            if check is not None:
-                return {'edit': True}
-            else:
-                return {'edit': False}
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                check = mongo.edit_library(request_elements)
+                if check is not None:
+                    return {'edit': True}
+                else:
+                    return {'edit': False}
     return {'token': False}
 
 
@@ -365,12 +369,13 @@ def delete_user(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            user_id = request_elements[0]
-            user_info = mongo.get_user_info(user_id)
-            if user_info is not None:
-                check = mongo.delete_user(user_id)
-                return {'delete': True}
-            return {'delete': False}
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                user_id = request_elements[0]
+                user_info = mongo.get_user_info(user_id)
+                if user_info is not None:
+                    mongo.delete_user(user_id)
+                    return {'delete': True}
+                return {'delete': False}
     return {'token': False}
 
 
@@ -406,11 +411,12 @@ def edit_user(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.edit_user(request_elements)
-            if check.modified_count != 0:
-                return {'edit': True}
-            else:
-                return {'edit': False}
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                check = mongo.edit_user(request_elements)
+                if check.modified_count != 0:
+                    return {'edit': True}
+                else:
+                    return {'edit': False}
     return {'token': False}
 
 
@@ -423,10 +429,11 @@ def create_board(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.board_create(request_elements)
-            if check is None:
-                return {'create': False}
-            return {'create': True}
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                check = mongo.board_create(request_elements)
+                if check is None:
+                    return {'create': False}
+                return {'create': True}
     return {'token': False}
 
 
@@ -439,8 +446,9 @@ def delete_board(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.board_delete(request_elements)
-            return {'delete': True}
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                mongo.board_delete(request_elements)
+                return {'delete': True}
     return {'token': False}
 
 
@@ -454,8 +462,9 @@ def edit_board(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.board_edit(request_elements)
-            return {'edit': True}
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                mongo.board_edit(request_elements)
+                return {'edit': True}
     return {'token': False}
 
 
