@@ -569,7 +569,7 @@ def detail_post(*request_elements):
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('date', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('edit_title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
-    Param('edit_content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('edit_content', JSON, str, rules=[Pattern(r'^.{2,10000}$')], required=True),
 )
 def edit_post(*request_elements):
     token = request.headers.get('Authorization')
@@ -582,6 +582,30 @@ def edit_post(*request_elements):
                     return {'edit': True}
                 else:
                     return {'edit': False}
+    return {'token': False}
+
+
+@app.route('/api/post/get_list', methods=['GET'])
+@validate_params(
+    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('count', GET, str, rules=[Pattern(r'\d')], required=True)
+)
+def get_list_post(*request_elements):
+    token = request.headers.get('Authorization')
+    if token is not None:
+        check = auth.token_update(token).modified_count
+        if check != 0:
+            check = mongo.get_special_posts(request_elements)
+
+            if check is None:
+                return {'list': False}
+
+            docs = []
+            for doc in check:  # 개소름
+                doc.pop('_id')
+                docs.append(doc)
+
+            return jsonify(docs)
     return {'token': False}
 
 
