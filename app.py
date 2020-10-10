@@ -569,7 +569,7 @@ def detail_post(*request_elements):
     Param('writer', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('date', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
     Param('edit_title', JSON, str, rules=[Pattern(r'^.{1,30}$')], required=True),
-    Param('edit_content', JSON, str, rules=[Pattern(r'^.{2,30}$')], required=True),
+    Param('edit_content', JSON, str, rules=[Pattern(r'^.{2,10000}$')], required=True),
 )
 def edit_post(*request_elements):
     token = request.headers.get('Authorization')
