@@ -131,7 +131,10 @@ class DBManager(object):
 
     def get_posts(self, request):
         return self.collection[request[0]].find()
-      
+
+    def get_special_posts(self, request):
+        return self.collection[request[0]].find().limit(int(request[1]))
+
     def delete_post(self, request):
         return self.collection[request[0]].delete_one({'title': request[1], 'writer': request[2], 'date': request[3]})
 
