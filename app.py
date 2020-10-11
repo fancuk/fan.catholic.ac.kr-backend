@@ -29,7 +29,7 @@ def login(*request_elements):
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
             auth.token_recreation(user_id)
-            json_request = {'login': 'True', 'user_id': user_id, 'token': auth.token_get(user_id)}
+            json_request = {'login': 'True', 'user_id': user_id, 'level': user_info['level'], 'token': auth.token_get(user_id)}
             resp = make_response(json_request)
             resp.headers['Authorization'] = auth.token_get(user_id)
             return resp
