@@ -313,12 +313,14 @@ def edit_profile(*request_elements):
 def info_profile(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
-        if auth.id_get(token) == request_elements[0]:
-            check = mongo.get_user_info(request_elements[0])
-            if check is not None:
-                check.pop('_id')
-                check.pop('user_pwd')
-                return check
+        check = auth.token_update(token).modified_count
+        if check != 0:
+            if auth.id_get(token) == request_elements[0]:
+                check = mongo.get_user_info(request_elements[0])
+                if check is not None:
+                    check.pop('_id')
+                    check.pop('user_pwd')
+                    return check
     return {'info': False}
 
 
