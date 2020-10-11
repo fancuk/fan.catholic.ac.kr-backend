@@ -321,7 +321,7 @@ def info_profile(*request_elements):
                     check.pop('_id')
                     check.pop('user_pwd')
                     return check
-    return {'info': False}
+    return {'token': False}
 
 
 @app.route('/api/user/library', methods=['GET'])
