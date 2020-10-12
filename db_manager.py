@@ -77,6 +77,9 @@ class DBManager(object):
     def search_library(self, request):
         return self.collection.library.find({'title': {"$regex": request[0], "$options": 'm'}})
 
+    def get_library_all_list(self):
+        return self.collection.library.find()
+
     def edit_user_profile(self, request):
         return self.collection.member.update_one({'user_id': request[0]},
                                                  {'$set':
