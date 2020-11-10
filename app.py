@@ -75,10 +75,14 @@ def logout(*request_elements):
     Param('email', JSON, str, rules=[Pattern(r'[a-zA-Z0-9_-]+@[a-z]+.[a-z]+')], required=True)
 )
 def register(*request_elements):
-    check = mongo.add_user_info(request_elements)
-    if check is not None:
-        auth.token_creation(request_elements[0])
-        json_request = {'register': True}
+    check = mongo.get_user_info(request_elements[0])
+    if check is None:
+        check = mongo.add_user_info(request_elements)
+        if check is not None:
+            auth.token_creation(request_elements[0])
+            json_request = {'register': True}
+        else:
+            json_request = {'register': False}
     else:
         json_request = {'register': False}
 
