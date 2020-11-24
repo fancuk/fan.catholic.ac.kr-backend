@@ -20,6 +20,16 @@ def hello_world():
     return 'Hello World!'
 
 
+# access token 재발급
+@app.route('/api/refresh')
+@jwt_refresh_token_required
+def refresh():
+    user_id = get_jwt_identity()
+    access_token = create_access_token(identity=user_id)
+    return jsonify(access_token=access_token)
+
+
+# 이거 참고해서 나머지 update 하면 될 것
 @app.route('/api/login', methods=['POST'])
 @validate_params(
     Param('user_id', JSON, str, rules=[Pattern(r'^[a-z0-9]+$')], required=True),  # 소문자와 숫자만 가능
