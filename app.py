@@ -1,4 +1,7 @@
 from flask import Flask, jsonify, request, make_response
+from flask_jwt_extended import(
+    JWTManager, jwt_required, create_access_token, get_jwt_identity, create_refresh_token, jwt_refresh_token_required
+)
 from flask_request_validator import (Param, JSON, GET, Pattern, validate_params)
 from flask_cors import CORS
 from db_manager import DBManager
@@ -28,15 +31,17 @@ def login(*request_elements):
     user_info = mongo.get_user_info(user_id)
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
+            access_token = create_access_token(identity=user_id)
+            refresh_token = create_refresh_token(identity=user_id)
             auth.token_recreation(user_id)
-            json_request = {'login': 'True', 'user_id': user_id, 'level': user_info['level'], 'token': auth.token_get(user_id)}
+            json_request = jsonify(login='True', user_id=user_id, level=user_info['level'], access_token=access_token, refresh_token=refresh_token)
             resp = make_response(json_request)
             resp.headers['Authorization'] = auth.token_get(user_id)
             return resp
         else:
-            json_request = {'login': False}
+            json_request = jsonify(login=False)
     else:
-        json_request = {'login': False}
+        json_request = jsonify(login=False)
 
     return jsonify(json_request)
 
