@@ -522,8 +522,14 @@ def list_post(*request_elements):
             for doc in check:  # 개소름
                 doc.pop('_id')
                 docs.append(doc)
+            print(request_elements[0])
+            if int(mongo.count_elements(request_elements[0]) % 10) is 0:
+                page = int(mongo.count_elements(request_elements[0]) / 10)
+            else:
+                page = int(mongo.count_elements(request_elements[0]) / 10) + 1
+            post_list = {'posts': docs}, {'page': page}
 
-            return jsonify(docs)
+            return jsonify(post_list)
     return {'token': False}
 
 
