@@ -29,7 +29,8 @@ def login(*request_elements):
     if user_info is not None:
         if user_pwd == user_info['user_pwd']:
             auth.token_recreation(user_id)
-            json_request = {'login': 'True', 'user_id': user_id, 'level': user_info['level'], 'token': auth.token_get(user_id)}
+            json_request = {'login': 'True', 'user_id': user_id, 'level': user_info['level'],
+                            'token': auth.token_get(user_id)}
             resp = make_response(json_request)
             resp.headers['Authorization'] = auth.token_get(user_id)
             return resp
@@ -96,12 +97,12 @@ def register(*request_elements):
 def reset_pwd(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
-            check = auth.token_update(token).modified_count
-            if check != 0:
-                if mongo.get_user_info(auth.id_get(token))['level'] == '3':
-                    user_pwd = 'fancuk'
-                    mongo.reset_pwd(request_elements[0], user_pwd)
-                    return {'reset': True}
+        check = auth.token_update(token).modified_count
+        if check != 0:
+            if mongo.get_user_info(auth.id_get(token))['level'] == '3':
+                user_pwd = 'fancuk'
+                mongo.reset_pwd(request_elements[0], user_pwd)
+                return {'reset': True}
     return {'token': False}
 
 
@@ -502,14 +503,21 @@ def add_post(*request_elements):
 
 @app.route('/api/post/list', methods=['GET'])
 @validate_params(
-    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True)
+    Param('board_name', GET, str, rules=[Pattern(r'^.{1,30}$')], required=True),
+    Param('page', GET, str, rules=[Pattern(r'\d')], required=False)
 )
 def list_post(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            check = mongo.get_posts(request_elements)
+            board_name = request_elements[0]
+
+            if request_elements[1] is None:
+                page = 1
+            else:
+                page = request_elements[1]
+            check = mongo.get_posts(board_name, int(page))
 
             if check is None:
                 return {'list': False}
@@ -518,11 +526,11 @@ def list_post(*request_elements):
             for doc in check:  # 개소름
                 doc.pop('_id')
                 docs.append(doc)
-            print(request_elements[0])
-            if int(mongo.count_elements(request_elements[0]) % 10) is 0:
-                page = int(mongo.count_elements(request_elements[0]) / 10)
+
+            if int(mongo.count_elements(board_name) % 10) is 0:
+                page = int(mongo.count_elements(board_name) / 10)
             else:
-                page = int(mongo.count_elements(request_elements[0]) / 10) + 1
+                page = int(mongo.count_elements(board_name) / 10) + 1
             post_list = {'posts': docs}, {'page': page}
 
             return jsonify(post_list)

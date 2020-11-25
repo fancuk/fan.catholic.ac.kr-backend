@@ -132,8 +132,8 @@ class DBManager(object):
                 return check
         return check
 
-    def get_posts(self, request):
-        return self.collection[request[0]].find()
+    def get_posts(self, board_name, page):
+        return self.collection[board_name].find().limit(10).skip((page - 1) * 10)
 
     def get_special_posts(self, request):
         return self.collection[request[0]].find().limit(int(request[1]))
