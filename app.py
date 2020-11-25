@@ -259,15 +259,11 @@ def search_library(*request_elements):
 
 
 @app.route('/api/library/rent_list', methods=['GET'])
-@validate_params(
-    Param('page', GET, str, rules=[Pattern(r'\d')], required=True)
-)
 def rent_list_library(*request_elements):
     token = request.headers.get('Authorization')
     if token is not None:
         auth.token_update(token)
-    page = request_elements[0]
-    check = mongo.get_library(int(page))
+    check = mongo.get_library_all_list()
     if check is None:
         return {'list': 'False'}
 
