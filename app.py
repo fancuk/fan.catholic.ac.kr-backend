@@ -568,9 +568,7 @@ def detail_post(*request_elements):
         check = auth.token_update(token).modified_count
         if check != 0:
             check = mongo.get_detail_post(request_elements)
-
             check.pop('_id')
-
             if check is None:
                 return {'detail': False}
             else:
@@ -592,7 +590,7 @@ def edit_post(*request_elements):
     if token is not None:
         check = auth.token_update(token).modified_count
         if check != 0:
-            if auth.id_get(token) == request_elements[3]:
+            if auth.id_get(token) == request_elements[2]:
                 check = mongo.edit_post(request_elements)
                 if check.modified_count != 0:
                     return {'edit': True}
